@@ -34,13 +34,13 @@ export const Portfolio = () => {
   }, []);
 
   const getSessionStoragePublicKey = () => {
-    if (sessionStorage.getItem("pubKey") === null) {
+    if (localStorage.getItem("data") === null) {
       navigate("/");
     }
   };
 
   useEffect(() => {
-    const pub = sessionStorage.getItem("pubKey");
+    const pub = localStorage.getItem("pubKey");
     setPubkey(pub);
   }, []);
 

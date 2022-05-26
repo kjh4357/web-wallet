@@ -4,9 +4,9 @@ import { ToastContainer } from "react-toastify";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { Home } from "@/pages/home/home";
 import { Portfolio } from "@/pages/portfolio/portfolio";
-import { ImportWallet } from "@/pages/sign/importWallet";
+import { ImportWallet } from "@/pages/access/importWallet";
 import { getSolanaTokenList } from "@/api/token";
-import { CreateWallet } from "@/pages/sign/createWallet";
+import { CreateWallet } from "@/pages/access/createWallet";
 import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
 
@@ -20,7 +20,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    getSessionStoragePublicKey();
+    getUserData();
   }, []);
 
   const getTokenList = async () => {
@@ -30,8 +30,8 @@ const App = () => {
     }
   };
 
-  const getSessionStoragePublicKey = () => {
-    setIsLogin(sessionStorage.getItem("pubKey") !== null);
+  const getUserData = () => {
+    setIsLogin(localStorage.getItem("data") !== null);
   };
 
   return (

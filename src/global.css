@@ -62,9 +62,13 @@ html, body {
   .btn {
     @apply flex items-center justify-center w-full rounded-full bg-purple-600 text-white h-28 text-3xl font-bold btn-gradient
   }
+ 
   .btn-text {
     @apply flex items-center justify-center w-full rounded-full text-pink-800 h-14 text-3xl font-bold
   }
+}
+.btn:disabled {
+  background: #ddd !important;
 }
 .min-w-320 {
   min-width: 320px;
