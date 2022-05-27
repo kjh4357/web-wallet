@@ -23,26 +23,43 @@ export const Portfolio = () => {
   const [pubKey, setPubkey] = useState(null);
   const [sendTokenModal, setSendTokenModal] = useState(false);
   const [tokenList, setTokenList] = useState([]);
+  const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
   const [toAddress, setToAddress] = useState("");
+  const [solanaTokenData, setSolanaTokenData] = useState(null);
   const value = useContext(KeypairContext);
 
   useEffect(() => {
     // Solana 네트워크 연결
     setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
     getSessionStoragePublicKey();
+    getSessionStorageCoinList();
   }, []);
 
   const getSessionStoragePublicKey = () => {
-    if (localStorage.getItem("data") === null) {
+    if (sessionStorage.getItem("pubKey") === null) {
       navigate("/");
     }
   };
 
+  const getSessionStorageCoinList = () => {
+    setAllTokenList(JSON.parse(sessionStorage.getItem("tokenList")));
+    console.log(allTokenList);
+  };
+
   useEffect(() => {
-    const pub = localStorage.getItem("pubKey");
+    const pub = sessionStorage.getItem("pubKey");
     setPubkey(pub);
   }, []);
+
+  useEffect(() => {
+    console.log(allTokenList);
+    setSolanaTokenData({
+      name: "Solana",
+      symbol: "SOL",
+      imageUrl: allTokenList.logoURI,
+    });
+  }, [allTokenList]);
 
   useEffect(() => {
     getSolanaBalance();
@@ -249,9 +266,16 @@ export const Portfolio = () => {
             {tokenList.map((item, index) => (
               <li key={index.toString()} className="py-5 pl-5 border-b-2 ">
                 <div className="flex items-center justify-between">
-                  <div className="mr-10 text-3xl truncate">
+                  <div className="flex items-center mr-10 text-3xl truncate">
+                    {index === 0 && (
+                      <img
+                        src={solanaTokenData.imageUrl}
+                        alt=""
+                        className="w-16 h-16 mr-4 rounded-full"
+                      />
+                    )}
                     <span className="font-bold truncate ">
-                      {item.tokenName}
+                      {index === 0 && solanaTokenData.name}({item.tokenName})
                     </span>
                   </div>
                   <div className="flex items-center flex-shrink-0">

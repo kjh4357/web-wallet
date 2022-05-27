@@ -48,30 +48,9 @@ const App = () => {
         pauseOnHover
       />
       <Routes>
-        <Route
-          path="/"
-          element={
-            !isLogin ? (
-              <Home solanaConnection={connection} />
-            ) : (
-              <Navigate to="/portfolio" />
-            )
-          }
-        />
-        <Route
-          path="create"
-          element={!isLogin ? <CreateWallet /> : <Navigate to="/portfolio" />}
-        />
-        <Route
-          path="access"
-          element={
-            !isLogin ? (
-              <ImportWallet {...connection} />
-            ) : (
-              <Navigate to="/portfolio" />
-            )
-          }
-        />
+        <Route path="/" element={<Home solanaConnection={connection} />} />
+        <Route path="create" element={<CreateWallet />} />
+        <Route path="access" element={<ImportWallet {...connection} />} />
         <Route path="portfolio" element={<Portfolio />} />
       </Routes>
     </Suspense>
