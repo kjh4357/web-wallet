@@ -66,6 +66,12 @@ html, body {
   .btn-text {
     @apply flex items-center justify-center w-full rounded-full text-pink-800 h-14 text-3xl font-bold
   }
+  @variants responsive {
+    .min-w-640 {
+      min-width: 640px;
+    }
+  }
+ 
 }
 .btn:disabled {
   background: #ddd !important;
@@ -73,6 +79,7 @@ html, body {
 .min-w-320 {
   min-width: 320px;
 }
+
 .data-number-list li:before{
   color: rgba(23, 23, 29, 0.7);
   width: 28px;

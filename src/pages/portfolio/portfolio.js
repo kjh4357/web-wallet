@@ -8,7 +8,12 @@ import {
   mdiChevronRight,
 } from "@mdi/js";
 import { Link } from "react-router-dom";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import {
+  clusterApiUrl,
+  Connection,
+  PublicKey,
+  Transaction,
+} from "@solana/web3.js";
 import { getUserTokens } from "@/api/token";
 import { addDecimal } from "@/utils/utils";
 import Modal from "@/components/modal";
@@ -22,22 +27,23 @@ export const Portfolio = () => {
   const [connection, setConnection] = useState(null);
   const [pubKey, setPubkey] = useState(null);
   const [sendTokenModal, setSendTokenModal] = useState(false);
+  const [typedMessage, setTypedMessage] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
-  const [toAddress, setToAddress] = useState("");
   const [solanaTokenData, setSolanaTokenData] = useState(null);
-  const value = useContext(KeypairContext);
+  const [toAddress, setToAddress] = useState("");
+  const [fee, setFee] = useState(null);
 
   useEffect(() => {
     // Solana 네트워크 연결
     setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
-    getSessionStoragePublicKey();
+    getLocalStorageUserData();
     getSessionStorageCoinList();
   }, []);
 
-  const getSessionStoragePublicKey = () => {
-    if (sessionStorage.getItem("pubKey") === null) {
+  const getLocalStorageUserData = () => {
+    if (localStorage.getItem("data") === null) {
       navigate("/");
     }
   };
@@ -137,10 +143,45 @@ export const Portfolio = () => {
     setSelectedToken(item);
   };
 
-  const onClickTokenSend = async () => {
-    const test = await connection.getFeeCalculatorForBlockhash(toAddress);
-    console.log(test);
+  const getUserMnemonic = () => {
+    // localstorage 유저 data 받아와서
+    // const userMnemonic = decipher(data, hashedText.substring(0, 16));
+    // console.log(userMnemonic);
+    // 니모닉, wallet context에 저장
+    // setUserMnemonic(userMnemonic);
   };
+
+  const decipher = (text, key) => {
+    const decode = crypto.createDecipheriv("aes-128-ecb", key, "");
+    const decodeResult =
+      decode.update(text, "base64", "utf8") + decode.final("utf8");
+    console.log(decodeResult);
+    return decodeResult;
+  };
+
+  // const getTransactionFee = async () => {
+  //   // 솔라나 토큰 Transaction Fee
+  //   let transaction = new Transaction().add(
+  //     SystemProgram.transfer({
+  //       fromPubkey: wallet.publicKey,
+  //       toPubkey: new PublicKey(toAddress),
+  //       lamports: LAMPORTS_PER_SOL, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
+  //     })
+  //   );
+
+  //   let responseBlockhash = await connection.getLatestBlockhash("finalized");
+  //   console.log(responseBlockhash);
+  //   transaction.recentBlockhash = responseBlockhash.blockhash;
+  //   transaction.feePayer = wallet.publicKey;
+  //   console.log(transaction);
+  //   const response = await connection.getFeeForMessage(
+  //     transaction.compileMessage(),
+  //     "confirmed"
+  //   );
+
+  //   console.log("Fee", response.value);
+  //   setFee(response.value);
+  // };
 
   // const postTransferToken = async () => {
   //   const mint = new PublicKey(tokenAddress);
@@ -178,53 +219,56 @@ export const Portfolio = () => {
   return (
     <>
       <Modal isModalOpen={sendTokenModal} setModalOpen={setSendTokenModal}>
-        {selectedToken && (
-          <div className="py-10">
-            <div className="text-center">
-              <h1 className="pb-5 text-3xl font-bold border-b-2">
-                {selectedToken.tokenName} 보내기
-              </h1>
-              <p className="px-10 mt-10 text-3xl">
-                잔액 : {addDecimal(selectedToken.balance)}{" "}
-                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
-              </p>
-            </div>
-            <div className="mt-10">
-              <input type="text" />
-              <p className="text-right">
-                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
-              </p>
-            </div>
-            <div className="mt-10 text-3xl">
-              <p className="mb-2">From</p>
-              <input type="text" value={pubKey} readOnly />
-            </div>
-            <div className="mt-10 text-3xl">
-              <p className="mb-2">To</p>
-              <input
-                type="text"
-                value={toAddress}
-                onChange={(e) => setToAddress(e.target.value)}
-              />
-            </div>
-            <div className="mt-20 text-center">
+        {selectedToken &&
+          (typedMessage ? (
+            <div></div>
+          ) : (
+            <div className="py-10 md:min-w-640">
+              <div className="text-center">
+                <h1 className="pb-5 text-3xl font-bold border-b-2">
+                  {selectedToken.tokenName} 보내기
+                </h1>
+                <p className="px-10 mt-10 text-3xl">
+                  잔액 : {addDecimal(selectedToken.balance)}{" "}
+                  {selectedToken.tokenName.substr(0, 3).toUpperCase()}
+                </p>
+              </div>
+              <div className="mt-10">
+                <input type="text" />
+                <p className="text-right">
+                  {selectedToken.tokenName.substr(0, 3).toUpperCase()}
+                </p>
+              </div>
+              <div className="mt-10 text-3xl">
+                <p className="mb-2">From</p>
+                <input type="text" value={pubKey} readOnly />
+              </div>
+              <div className="mt-10 text-3xl">
+                <p className="mb-2">To</p>
+                <input
+                  type="text"
+                  value={toAddress}
+                  onChange={(e) => setToAddress(e.target.value)}
+                />
+              </div>
+              <div className="mt-20 text-center">
+                <button
+                  type="button"
+                  className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
+                  // onClick={onClickTokenSend}
+                >
+                  보내기
+                </button>
+              </div>
               <button
                 type="button"
-                className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
-                onClick={onClickTokenSend}
+                className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+                onClick={() => setSendTokenModal(false)}
               >
-                보내기
+                <Icon path={mdiClose} size={1.5} color="black" />
               </button>
             </div>
-            <button
-              type="button"
-              className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
-              onClick={() => setSendTokenModal(false)}
-            >
-              <Icon path={mdiClose} size={1.5} color="black" />
-            </button>
-          </div>
-        )}
+          ))}
       </Modal>
       <Header />
       <div className="px-10 pt-40 pb-20">

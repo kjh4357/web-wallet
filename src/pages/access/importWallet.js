@@ -72,6 +72,7 @@ export const ImportWallet = (props) => {
 
     window.localStorage.setItem("secure", hashedText);
     window.localStorage.setItem("data", encryptMnemonic);
+    navigate("/portfolio");
   };
 
   const postLoginWalletPassword = async () => {
@@ -90,9 +91,10 @@ export const ImportWallet = (props) => {
         return;
       }
       console.log("Password correct.");
-      const userMnemonic = decipher(data, hashedText.substring(0, 16));
-      console.log(userMnemonic);
-      setUserMnemonic(userMnemonic);
+      navigate("/portfolio");
+      // const userMnemonic = decipher(data, hashedText.substring(0, 16));
+      // console.log(userMnemonic);
+      // setUserMnemonic(userMnemonic);
     }
   };
 
@@ -103,7 +105,7 @@ export const ImportWallet = (props) => {
   }, [userMnemonic]);
 
   const handlePasswordLogin = async () => {
-    await importWallet();
+    // await importWallet();
   };
 
   const getHashedValue = async (text) => {
@@ -201,7 +203,7 @@ export const ImportWallet = (props) => {
 
   const onClickSetPassword = async () => {
     if (password === confirm) {
-      await importWallet();
+      // await importWallet();
       putWalletPassword();
     } else {
       setIsInValid(true);
