@@ -11,15 +11,20 @@ import { Link } from "react-router-dom";
 import {
   clusterApiUrl,
   Connection,
+  Keypair,
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
+import * as bip39 from "bip39";
+import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
 import { addDecimal } from "@/utils/utils";
 import Modal from "@/components/modal";
 import Header from "@/components/header";
 import { generateFromString } from "generate-avatar";
 import { useNavigate } from "react-router-dom";
+import crypto from "crypto";
+import { derivePath } from "ed25519-hd-key";
 import KeypairContext from "@/context/keypair.context";
 
 export const Portfolio = () => {
@@ -32,8 +37,14 @@ export const Portfolio = () => {
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
   const [solanaTokenData, setSolanaTokenData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [toAddress, setToAddress] = useState("");
+  const [userMnemonic, setUserMnemonic] = useState("");
+  const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
+  const { keypair, updateKeypair } = useContext(KeypairContext);
+
+  console.log(keypair);
 
   useEffect(() => {
     // Solana 네트워크 연결
@@ -42,24 +53,35 @@ export const Portfolio = () => {
     getSessionStorageCoinList();
   }, []);
 
+  useEffect(() => {
+    importWallet();
+    getSolanaBalance();
+  }, [pubKey, userMnemonic]);
+
+  useEffect(() => {
+    console.log(tokenList);
+  }, [tokenList]);
+
   const getLocalStorageUserData = () => {
     if (localStorage.getItem("data") === null) {
       navigate("/");
+    } else {
+      handleGetUserMnemonic();
     }
+  };
+
+  const handleGetUserMnemonic = () => {
+    const data = localStorage.getItem("data");
+    const hashedText = localStorage.getItem("secure");
+    const userMnemonic = decipher(data, hashedText.substring(0, 16));
+    setUserMnemonic(userMnemonic);
   };
 
   const getSessionStorageCoinList = () => {
     setAllTokenList(JSON.parse(sessionStorage.getItem("tokenList")));
-    console.log(allTokenList);
   };
 
   useEffect(() => {
-    const pub = sessionStorage.getItem("pubKey");
-    setPubkey(pub);
-  }, []);
-
-  useEffect(() => {
-    console.log(allTokenList);
     setSolanaTokenData({
       name: "Solana",
       symbol: "SOL",
@@ -67,9 +89,16 @@ export const Portfolio = () => {
     });
   }, [allTokenList]);
 
-  useEffect(() => {
-    getSolanaBalance();
-  }, [connection]);
+  const handleFindTokenData = async (tokenAddress) => {
+    console.log(allTokenList);
+    if (allTokenList) {
+      const res = await allTokenList.tokens.find(
+        (item) => item.address === tokenAddress
+      );
+      console.log(res);
+      return res;
+    }
+  };
 
   const getSolanaBalance = async () => {
     if (pubKey) {
@@ -112,13 +141,18 @@ export const Portfolio = () => {
 
       const response = await getUserTokens(data);
       if (response.status === 200) {
-        const tokenList = response.data.result;
-        tokenList.map((item) => {
+        console.log(response.data.result);
+        const userTokenList = response.data.result;
+        userTokenList.map(async (item) => {
+          let coinData = await handleFindTokenData(
+            item.account.data.parsed.info.mint
+          );
           setTokenList((prev) => [
             ...prev,
             {
-              tokenName: item.pubkey,
+              tokenName: item.account.data.parsed.info.mint,
               balance: item.account.data.parsed.info.tokenAmount.uiAmount,
+              data: coinData,
             },
           ]);
         });
@@ -143,20 +177,65 @@ export const Portfolio = () => {
     setSelectedToken(item);
   };
 
-  const getUserMnemonic = () => {
-    // localstorage 유저 data 받아와서
-    // const userMnemonic = decipher(data, hashedText.substring(0, 16));
-    // console.log(userMnemonic);
-    // 니모닉, wallet context에 저장
-    // setUserMnemonic(userMnemonic);
-  };
-
   const decipher = (text, key) => {
     const decode = crypto.createDecipheriv("aes-128-ecb", key, "");
     const decodeResult =
       decode.update(text, "base64", "utf8") + decode.final("utf8");
-    console.log(decodeResult);
     return decodeResult;
+  };
+
+  const importWallet = async () => {
+    const keypairs = [];
+    const accounts = [];
+    if (bip39.validateMnemonic(userMnemonic)) {
+      const seed = bip39.mnemonicToSeedSync(userMnemonic, ""); // prefer async mnemonicToSeed
+      const bip39KeyPair = Keypair.fromSecretKey(
+        nacl.sign.keyPair.fromSeed(seed.slice(0, 32)).secretKey
+      );
+      keypairs.push(bip39KeyPair);
+      accounts.push(bip39KeyPair.publicKey);
+
+      for (let i = 0; i < 10; i++) {
+        const path = `m/44'/501'/0'/${i}'`;
+        const keypair = Keypair.fromSeed(
+          derivePath(path, seed.toString("hex")).key
+        );
+        keypairs.push(keypair);
+        accounts.push(keypair.publicKey);
+      }
+
+      for (let i = 0; i < 10; i++) {
+        const path = `m/44'/501'/${i}'/0'`;
+        const keypair = Keypair.fromSeed(
+          derivePath(path, seed.toString("hex")).key
+        );
+        keypairs.push(keypair);
+        accounts.push(keypair.publicKey);
+      }
+
+      const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
+      const availAccount = [];
+      accountsInfo.forEach((account, i) => {
+        if (account != null) {
+          availAccount.push(keypairs[i]);
+        }
+      });
+
+      let wallet = Keypair.fromSeed(
+        derivePath(`m/44'/501'/0'/0'`, seed.toString("hex")).key
+      );
+      if (availAccount.length > 0) {
+        wallet = availAccount[0];
+      }
+      setWallet(wallet);
+      updateKeypair(wallet);
+      setPubkey(wallet.publicKey.toBase58());
+      localStorage.setItem("pubKey", wallet.publicKey.toBase58());
+    }
+  };
+
+  const onClickMoveTransactionList = () => {
+    navigate("/history");
   };
 
   // const getTransactionFee = async () => {
@@ -307,43 +386,72 @@ export const Portfolio = () => {
         <div className="p-10 mt-10 bg-white shadow-lg x-10 rounded-xl">
           <h2 className="mb-10 text-4xl font-black">자산</h2>
           <ul className="border-t-2">
-            {tokenList.map((item, index) => (
-              <li key={index.toString()} className="py-5 pl-5 border-b-2 ">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center mr-10 text-3xl truncate">
-                    {index === 0 && (
-                      <img
-                        src={solanaTokenData.imageUrl}
-                        alt=""
-                        className="w-16 h-16 mr-4 rounded-full"
-                      />
-                    )}
-                    <span className="font-bold truncate ">
-                      {index === 0 && solanaTokenData.name}({item.tokenName})
-                    </span>
-                  </div>
-                  <div className="flex items-center flex-shrink-0">
-                    <span className="mr-5 text-2xl font-bold">
-                      {addDecimal(item.balance)}
-                      <span className="ml-3">
-                        {item.tokenName.substr(0, 3).toUpperCase()}
+            {tokenList.length > 0 &&
+              tokenList.map((item, index) => (
+                <li key={index.toString()} className="py-5 pl-5 border-b-2 ">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center mr-10 text-3xl truncate">
+                      {index === 0 ? (
+                        <img
+                          src={solanaTokenData.imageUrl}
+                          alt=""
+                          className="w-16 h-16 mr-4 rounded-full"
+                        />
+                      ) : item.data ? (
+                        <img
+                          src={item.data.logoURI}
+                          alt=""
+                          className="w-16 h-16 mr-4 rounded-full"
+                        />
+                      ) : (
+                        <img
+                          src={`data:image/svg+xml;utf8,${generateFromString(
+                            item.tokenName
+                          )}`}
+                          alt=""
+                          className="w-16 h-16 mr-4 rounded-full"
+                        />
+                      )}
+
+                      <span className="font-bold truncate">
+                        {index === 0
+                          ? solanaTokenData.name
+                          : item.data
+                          ? item.data.symbol
+                          : "UNKNOWN"}
                       </span>
-                    </span>
-                    <Link to="/">
-                      <Icon path={mdiChevronRight} size={2} color="#ddd" />
-                    </Link>
+                    </div>
+                    <div className="flex items-center flex-shrink-0">
+                      <span className="text-2xl font-bold">
+                        {addDecimal(item.balance)}
+
+                        {index === 0 ? (
+                          <span className="ml-5">
+                            {item.tokenName.substr(0, 3).toUpperCase()}
+                          </span>
+                        ) : item.data ? (
+                          <span>{item.data.symbol}</span>
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        className="cursor-pointer"
+                        onClick={onClickMoveTransactionList}
+                      >
+                        <Icon path={mdiChevronRight} size={2} color="#ddd" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-5 text-center">
-                  <button
-                    onClick={() => onClickOpenTokenSendModal(item)}
-                    className="inline-block px-8 py-3 text-2xl text-white rounded-md loa-gradient"
-                  >
-                    보내기
-                  </button>
-                </div>
-              </li>
-            ))}
+                  <div className="mt-5 text-center">
+                    <button
+                      onClick={() => onClickOpenTokenSendModal(item)}
+                      className="inline-block px-8 py-3 text-2xl text-black border-2 rounded-md cursor-pointer hover-gradient"
+                    >
+                      보내기
+                    </button>
+                  </div>
+                </li>
+              ))}
           </ul>
         </div>
       </div>

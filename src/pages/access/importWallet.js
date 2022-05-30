@@ -36,17 +36,7 @@ export const ImportWallet = (props) => {
     // Solana 네트워크 연결
     setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
     handleCheckUserLogin();
-    // getSessionStoragePublicKey();
   }, []);
-
-  const getSessionStoragePublicKey = () => {
-    const path = Route();
-    console.log(path);
-    console.log();
-    if (sessionStorage.getItem("pubKey") !== null) {
-      navigate("/portfolio");
-    }
-  };
 
   const handleCheckUserLogin = () => {
     console.log(localStorage.getItem("data") ? true : false);
@@ -91,7 +81,7 @@ export const ImportWallet = (props) => {
         return;
       }
       console.log("Password correct.");
-      navigate("/portfolio");
+      handlePasswordLogin();
       // const userMnemonic = decipher(data, hashedText.substring(0, 16));
       // console.log(userMnemonic);
       // setUserMnemonic(userMnemonic);
@@ -106,6 +96,8 @@ export const ImportWallet = (props) => {
 
   const handlePasswordLogin = async () => {
     // await importWallet();
+    setLocalStoragePublicKey();
+    navigate("/portfolio");
   };
 
   const getHashedValue = async (text) => {
@@ -121,80 +113,8 @@ export const ImportWallet = (props) => {
     return encryptResult;
   };
 
-  const decipher = (text, key) => {
-    const decode = crypto.createDecipheriv("aes-128-ecb", key, "");
-    const decodeResult =
-      decode.update(text, "base64", "utf8") + decode.final("utf8");
-    console.log(decodeResult);
-    return decodeResult;
-  };
-
-  const importWallet = async () => {
-    const keypairs = [];
-    const accounts = [];
-    console.log(userMnemonic);
-    if (bip39.validateMnemonic(userMnemonic)) {
-      const seed = bip39.mnemonicToSeedSync(userMnemonic, ""); // prefer async mnemonicToSeed
-
-      const bip39KeyPair = Keypair.fromSecretKey(
-        nacl.sign.keyPair.fromSeed(seed.slice(0, 32)).secretKey
-      );
-      keypairs.push(bip39KeyPair);
-      accounts.push(bip39KeyPair.publicKey);
-      console.log(`bip39KeyPair => ${bip39KeyPair.publicKey.toBase58()}`);
-
-      for (let i = 0; i < 10; i++) {
-        const path = `m/44'/501'/0'/${i}'`;
-        const keypair = Keypair.fromSeed(
-          derivePath(path, seed.toString("hex")).key
-        );
-        console.log(`${path} => ${keypair.publicKey.toBase58()}`);
-        keypairs.push(keypair);
-        accounts.push(keypair.publicKey);
-      }
-
-      for (let i = 0; i < 10; i++) {
-        const path = `m/44'/501'/${i}'/0'`;
-        const keypair = Keypair.fromSeed(
-          derivePath(path, seed.toString("hex")).key
-        );
-        console.log(`${path} => ${keypair.publicKey.toBase58()}`);
-        keypairs.push(keypair);
-        accounts.push(keypair.publicKey);
-      }
-
-      const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
-      console.log(accountsInfo);
-      const availAccount = [];
-      accountsInfo.forEach((account, i) => {
-        if (account != null) {
-          console.log(account.owner.toBase58());
-          console.log(keypairs[i]);
-          availAccount.push(keypairs[i]);
-        }
-      });
-
-      console.log("availAccount: ", availAccount.length);
-
-      let wallet = Keypair.fromSeed(
-        derivePath(`m/44'/501'/0'/0'`, seed.toString("hex")).key
-      );
-      if (availAccount.length > 0) {
-        wallet = availAccount[0];
-      }
-      console.log(wallet);
-
-      setWallet(wallet);
-      setUserAddress(wallet.publicKey.toBase58());
-      setSessionStoragePublicKey(wallet.publicKey.toBase58());
-      navigate("/portfolio");
-    } else {
-      toast.error("잘못된 복구 문구입니다.");
-    }
-  };
-
-  const setSessionStoragePublicKey = (pubKey) => {
-    sessionStorage.setItem("pubKey", pubKey);
+  const setLocalStoragePublicKey = (pubKey) => {
+    localStorage.setItem("pubKey", pubKey);
   };
 
   const onChangeMnemonic = (e) => {

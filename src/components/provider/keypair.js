@@ -15,7 +15,6 @@ const KeypairProvider = ({ children }) => {
     updateKeypair,
   };
   const [keypair, setKeypair] = useState(initialState);
-
   return (
     <KeypairContext.Provider value={keypair}>
       {children}

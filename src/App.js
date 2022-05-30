@@ -9,6 +9,7 @@ import { getSolanaTokenList } from "@/api/token";
 import { CreateWallet } from "@/pages/access/createWallet";
 import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
+import { TransactionList } from "./pages/history/transactionList";
 
 const App = () => {
   const [connection, setConnection] = useState();
@@ -52,6 +53,7 @@ const App = () => {
         <Route path="create" element={<CreateWallet />} />
         <Route path="access" element={<ImportWallet {...connection} />} />
         <Route path="portfolio" element={<Portfolio />} />
+        <Route path="history" element={<TransactionList />} />
       </Routes>
     </Suspense>
   );

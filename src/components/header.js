@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 export default function Header() {
   const navigate = useNavigate();
   const onClickLogout = () => {
-    sessionStorage.removeItem("pubKey");
+    localStorage.removeItem("pubKey");
+    localStorage.removeItem("data");
+    localStorage.removeItem("secure");
     navigate("/");
   };
   return (
