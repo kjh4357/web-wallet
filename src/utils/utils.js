@@ -1,11 +1,13 @@
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+
 export function cls(...classnames) {
   return classnames.join(" ");
 }
 
 export function addDecimal(amount) {
   if (Number.isInteger(amount)) {
-    return amount / 1000000000;
+    return Number(amount / LAMPORTS_PER_SOL);
   } else {
-    return amount.toFixed(8);
+    return Number(amount.toFixed(8));
   }
 }

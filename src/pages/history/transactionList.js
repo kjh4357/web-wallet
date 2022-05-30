@@ -54,7 +54,7 @@ export const TransactionList = () => {
       {loading ? (
         <Speaner />
       ) : (
-        <div className="h-full min-h-full px-10 pt-48 pb-20">
+        <div className="px-10 pt-48 pb-20">
           <h1 className="text-5xl font-bold">Transaction List</h1>
           {transactions.length > 0 ? (
             <ul className="mt-10">

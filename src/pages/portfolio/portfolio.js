@@ -14,6 +14,8 @@ import {
   Keypair,
   PublicKey,
   Transaction,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
@@ -32,13 +34,16 @@ export const Portfolio = () => {
   const [connection, setConnection] = useState(null);
   const [pubKey, setPubkey] = useState(null);
   const [sendTokenModal, setSendTokenModal] = useState(false);
+  const [receiptModal, setReceiptModal] = useState(false);
   const [typedMessage, setTypedMessage] = useState(false);
+  const [invalidCalculate, setInvalidCalculate] = useState(false);
+
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
   const [solanaTokenData, setSolanaTokenData] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [toAddress, setToAddress] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
   const [userMnemonic, setUserMnemonic] = useState("");
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
@@ -113,6 +118,24 @@ export const Portfolio = () => {
       await getTokens(newPubKey);
     }
   };
+
+  const handleCalculateTokens = (amount) => {
+    if (selectedToken) {
+      const remainAmount = addDecimal(selectedToken.balance);
+      const sendAmount =
+        amount < 1 ? addDecimal(Number(amount)) : Number(amount);
+
+      console.log(remainAmount, sendAmount);
+      console.log(remainAmount - sendAmount < 0);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedToken) {
+      const remainAmount = addDecimal(selectedToken.balance);
+      setInvalidCalculate(remainAmount - sendAmount < 0);
+    }
+  }, [sendAmount]);
 
   const getTokens = async (newPubKey) => {
     if (newPubKey) {
@@ -238,29 +261,43 @@ export const Portfolio = () => {
     navigate("/history");
   };
 
-  // const getTransactionFee = async () => {
-  //   // 솔라나 토큰 Transaction Fee
-  //   let transaction = new Transaction().add(
-  //     SystemProgram.transfer({
-  //       fromPubkey: wallet.publicKey,
-  //       toPubkey: new PublicKey(toAddress),
-  //       lamports: LAMPORTS_PER_SOL, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
-  //     })
-  //   );
+  const onClickTokenSend = async () => {
+    if (!invalidCalculate && sendAmount) {
+      if (toAddress) {
+        await getTransactionFee();
+        setReceiptModal(true);
+        setSendTokenModal(false);
+      } else {
+        toast.error("토큰을 보낼 주소를 적어주세요");
+      }
+    } else {
+      toast.error("수량을 확인해주세요");
+    }
+  };
 
-  //   let responseBlockhash = await connection.getLatestBlockhash("finalized");
-  //   console.log(responseBlockhash);
-  //   transaction.recentBlockhash = responseBlockhash.blockhash;
-  //   transaction.feePayer = wallet.publicKey;
-  //   console.log(transaction);
-  //   const response = await connection.getFeeForMessage(
-  //     transaction.compileMessage(),
-  //     "confirmed"
-  //   );
+  const getTransactionFee = async () => {
+    // 솔라나 토큰 Transaction Fee
+    let transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: wallet.publicKey,
+        toPubkey: new PublicKey(toAddress),
+        lamports: LAMPORTS_PER_SOL, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
+      })
+    );
 
-  //   console.log("Fee", response.value);
-  //   setFee(response.value);
-  // };
+    let responseBlockhash = await connection.getLatestBlockhash("finalized");
+    console.log(responseBlockhash);
+    transaction.recentBlockhash = responseBlockhash.blockhash;
+    transaction.feePayer = wallet.publicKey;
+    console.log(transaction);
+    const response = await connection.getFeeForMessage(
+      transaction.compileMessage(),
+      "confirmed"
+    );
+
+    console.log("Fee", response.value);
+    setFee(response.value);
+  };
 
   // const postTransferToken = async () => {
   //   const mint = new PublicKey(tokenAddress);
@@ -297,6 +334,40 @@ export const Portfolio = () => {
 
   return (
     <>
+      <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
+        <div>
+          <p>From</p>
+          <p>{pubKey}</p>
+          <p>To</p>
+          <p>{toAddress}</p>
+          <p>보낼 수량</p>
+          {selectedToken && (
+            <p>
+              {sendAmount} {selectedToken.tokenName}
+            </p>
+          )}
+
+          <p>Fee</p>
+          <p>{addDecimal(Number(fee))}</p>
+          <p>남은 수량</p>
+          <p>{handleCalculateTokens(sendAmount)}</p>
+          <div className="mt-20 text-center">
+            <button
+              type="button"
+              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
+            >
+              보내기
+            </button>
+          </div>
+          <button
+            type="button"
+            className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+            onClick={() => setReceiptModal(false)}
+          >
+            <Icon path={mdiClose} size={1.5} color="black" />
+          </button>
+        </div>
+      </Modal>
       <Modal isModalOpen={sendTokenModal} setModalOpen={setSendTokenModal}>
         {selectedToken &&
           (typedMessage ? (
@@ -313,7 +384,10 @@ export const Portfolio = () => {
                 </p>
               </div>
               <div className="mt-10">
-                <input type="text" />
+                <input
+                  type="text"
+                  onChange={(e) => setSendAmount(e.target.value)}
+                />
                 <p className="text-right">
                   {selectedToken.tokenName.substr(0, 3).toUpperCase()}
                 </p>
@@ -334,7 +408,7 @@ export const Portfolio = () => {
                 <button
                   type="button"
                   className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
-                  // onClick={onClickTokenSend}
+                  onClick={onClickTokenSend}
                 >
                   보내기
                 </button>
