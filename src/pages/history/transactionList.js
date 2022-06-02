@@ -19,7 +19,7 @@ export const TransactionList = () => {
     setConnection(
       new Connection(
         //clusterApiUrl('mainnet-beta'),
-        clusterApiUrl("devnet"),
+        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
         "confirmed"
       )
     );
@@ -73,7 +73,9 @@ export const TransactionList = () => {
                     </p>
                   </div>
                   <a
-                    href={`https://explorer.solana.com/tx/${item.signature}?cluster=devnet`}
+                    href={`https://explorer.solana.com/tx/${item.signature}${
+                      process.env.development && "?cluster=devnet"
+                    }`}
                     target="_blank"
                     className="cursor-pointer"
                     rel="noreferrer"

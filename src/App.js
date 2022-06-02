@@ -9,19 +9,19 @@ import { getSolanaTokenList } from "@/api/token";
 import { CreateWallet } from "@/pages/access/createWallet";
 import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
-import { TransactionList } from "./pages/history/transactionList";
+import { TransactionList } from "@/pages/history/transactionList";
 
 const App = () => {
   const [connection, setConnection] = useState();
-  const [isLogin, setIsLogin] = useState(true);
 
   useEffect(() => {
-    setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
+    setConnection(
+      new Connection(
+        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
+        "confirmed"
+      )
+    );
     getTokenList();
-  }, []);
-
-  useEffect(() => {
-    getUserData();
   }, []);
 
   const getTokenList = async () => {
@@ -29,10 +29,6 @@ const App = () => {
     if (response.status === 200) {
       sessionStorage.setItem("tokenList", JSON.stringify(response.data));
     }
-  };
-
-  const getUserData = () => {
-    setIsLogin(localStorage.getItem("data") !== null);
   };
 
   return (

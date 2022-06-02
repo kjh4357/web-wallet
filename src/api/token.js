@@ -14,11 +14,15 @@ export const getSolanaTokenList = async (data) => {
 };
 
 export const getUserTokens = async (data) => {
-  const response = await axios.post("https://api.devnet.solana.com", data, {
-    headers: {
-      "Content-type": "application/json",
-      Accept: "application/json",
-    },
-  });
+  const response = await axios.post(
+    process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT,
+    data,
+    {
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  );
   return response;
 };

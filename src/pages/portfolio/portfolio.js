@@ -7,7 +7,7 @@ import {
   mdiClose,
   mdiChevronRight,
 } from "@mdi/js";
-import { Link } from "react-router-dom";
+import * as splToken from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
@@ -16,6 +16,7 @@ import {
   Transaction,
   SystemProgram,
   LAMPORTS_PER_SOL,
+  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
@@ -29,6 +30,8 @@ import crypto from "crypto";
 import { derivePath } from "ed25519-hd-key";
 import KeypairContext from "@/context/keypair.context";
 
+const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
+
 export const Portfolio = () => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState(null);
@@ -36,7 +39,7 @@ export const Portfolio = () => {
   const [sendTokenModal, setSendTokenModal] = useState(false);
   const [receiptModal, setReceiptModal] = useState(false);
   const [typedMessage, setTypedMessage] = useState(false);
-  const [invalidCalculate, setInvalidCalculate] = useState(false);
+  const [isSolanaToken, setIsSolanaToken] = useState(false);
 
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
@@ -44,16 +47,22 @@ export const Portfolio = () => {
   const [solanaTokenData, setSolanaTokenData] = useState(null);
   const [toAddress, setToAddress] = useState("");
   const [sendAmount, setSendAmount] = useState("");
+  const [solanaAmount, setSolanaAmount] = useState(null);
+  const [remainSolanaAmount, setRemainSolanaAmount] = useState(null);
+  const [remainTokenAmount, setRemainTokenAmount] = useState(null);
   const [userMnemonic, setUserMnemonic] = useState("");
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
   const { keypair, updateKeypair } = useContext(KeypairContext);
 
-  console.log(keypair);
-
   useEffect(() => {
     // Solana 네트워크 연결
-    setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
+    setConnection(
+      new Connection(
+        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
+        "confirmed"
+      )
+    );
     getLocalStorageUserData();
     getSessionStorageCoinList();
   }, []);
@@ -62,10 +71,6 @@ export const Portfolio = () => {
     importWallet();
     getSolanaBalance();
   }, [pubKey, userMnemonic]);
-
-  useEffect(() => {
-    console.log(tokenList);
-  }, [tokenList]);
 
   const getLocalStorageUserData = () => {
     if (localStorage.getItem("data") === null) {
@@ -90,6 +95,7 @@ export const Portfolio = () => {
     setSolanaTokenData({
       name: "Solana",
       symbol: "SOL",
+      decimal: solanaDecimalLength,
       imageUrl: allTokenList.logoURI,
     });
   }, [allTokenList]);
@@ -112,30 +118,30 @@ export const Portfolio = () => {
       setTokenList([
         {
           tokenName: "SOL",
-          balance,
+          balance: addDecimal(balance, solanaDecimalLength),
+          decimal: solanaDecimalLength,
         },
       ]);
+      setSolanaAmount(addDecimal(balance, solanaDecimalLength));
       await getTokens(newPubKey);
     }
   };
 
-  const handleCalculateTokens = (amount) => {
-    if (selectedToken) {
-      const remainAmount = addDecimal(selectedToken.balance);
-      const sendAmount =
-        amount < 1 ? addDecimal(Number(amount)) : Number(amount);
+  useEffect(() => {
+    if (toAddress) {
+      validateSolAddress(toAddress);
+    }
+  }, [toAddress]);
 
-      console.log(remainAmount, sendAmount);
-      console.log(remainAmount - sendAmount < 0);
+  const validateSolAddress = async (toAddress) => {
+    try {
+      let pubkey = new PublicKey(toAddress);
+      let isSolana = await PublicKey.isOnCurve(pubkey);
+      setIsSolanaToken(isSolana);
+    } catch (err) {
+      setIsSolanaToken(false);
     }
   };
-
-  useEffect(() => {
-    if (selectedToken) {
-      const remainAmount = addDecimal(selectedToken.balance);
-      setInvalidCalculate(remainAmount - sendAmount < 0);
-    }
-  }, [sendAmount]);
 
   const getTokens = async (newPubKey) => {
     if (newPubKey) {
@@ -144,7 +150,7 @@ export const Portfolio = () => {
         id: 1,
         method: "getProgramAccounts",
         params: [
-          "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          process.env.REACT_APP_TOKEN_PROGRAM_ACCOUNT,
           {
             encoding: "jsonParsed",
             filters: [
@@ -166,6 +172,7 @@ export const Portfolio = () => {
       if (response.status === 200) {
         console.log(response.data.result);
         const userTokenList = response.data.result;
+
         userTokenList.map(async (item) => {
           let coinData = await handleFindTokenData(
             item.account.data.parsed.info.mint
@@ -174,11 +181,18 @@ export const Portfolio = () => {
             ...prev,
             {
               tokenName: item.account.data.parsed.info.mint,
-              balance: item.account.data.parsed.info.tokenAmount.uiAmount,
+              balance: addDecimal(
+                item.account.data.parsed.info.tokenAmount.uiAmount,
+                item.account.data.parsed.info.tokenAmount.decimals
+              ),
+              balanceString:
+                item.account.data.parsed.info.tokenAmount.uiAmountString,
+              decimal: item.account.data.parsed.info.tokenAmount.decimals,
               data: coinData,
             },
           ]);
         });
+        console.log(tokenList);
       }
     }
     // setTokens(response.data.result);
@@ -262,11 +276,47 @@ export const Portfolio = () => {
   };
 
   const onClickTokenSend = async () => {
-    if (!invalidCalculate && sendAmount) {
+    if (sendAmount) {
       if (toAddress) {
-        await getTransactionFee();
-        setReceiptModal(true);
-        setSendTokenModal(false);
+        if (isSolanaToken) {
+          console.log(selectedToken);
+          const fees = await getTransactionFee();
+          setFee(addDecimal(fees, solanaDecimalLength));
+          if (selectedToken.tokenName === "SOL") {
+            const resultSendAmount =
+              solanaAmount -
+              addDecimal(fees, solanaDecimalLength) -
+              Number(sendAmount);
+            if (resultSendAmount >= 0) {
+              setRemainSolanaAmount(
+                addDecimal(resultSendAmount, solanaDecimalLength)
+              );
+              setReceiptModal(true);
+              setSendTokenModal(false);
+            } else {
+              toast.error("SOL 잔액을 확인해주세요");
+            }
+          } else {
+            const calSolAmount =
+              solanaAmount - addDecimal(fees, solanaDecimalLength);
+            const calTokenAmount =
+              Number(selectedToken.balance) - Number(sendAmount);
+            if (calSolAmount >= 0 && calTokenAmount >= 0) {
+              setRemainTokenAmount(
+                addDecimal(calTokenAmount, selectedToken.decimal)
+              );
+              setReceiptModal(true);
+              setSendTokenModal(false);
+            } else {
+              toast.error("SOL 잔액 또는 토큰 잔액을 확인해주세요");
+            }
+          }
+        } else {
+          toast.error("올바른 토큰 주소가 아닙니다.");
+        }
+
+        // setReceiptModal(true);
+        // setSendTokenModal(false);
       } else {
         toast.error("토큰을 보낼 주소를 적어주세요");
       }
@@ -286,75 +336,116 @@ export const Portfolio = () => {
     );
 
     let responseBlockhash = await connection.getLatestBlockhash("finalized");
-    console.log(responseBlockhash);
     transaction.recentBlockhash = responseBlockhash.blockhash;
     transaction.feePayer = wallet.publicKey;
-    console.log(transaction);
     const response = await connection.getFeeForMessage(
       transaction.compileMessage(),
       "confirmed"
     );
+    // const fee = addDecimal(response.value, solanaDecimalLength);
+    // console.log(fee);
 
-    console.log("Fee", response.value);
-    setFee(response.value);
+    return response.value;
   };
 
-  // const postTransferToken = async () => {
-  //   const mint = new PublicKey(tokenAddress);
+  const sendToken = async () => {
+    console.log(selectedToken);
+    if (selectedToken.tokenName === "SOL") {
+      const res = await postTransferTokenForSolana();
+      if (res) {
+        setReceiptModal(false);
+        navigate("/history");
+      }
+    } else {
+      const res = await postTransferToken();
+      if (res) {
+        setReceiptModal(false);
+        navigate("/history");
+      }
+    }
+  };
 
-  //   const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
-  //     connection,
-  //     wallet,
-  //     mint,
-  //     wallet.publicKey
-  //   );
+  const postTransferTokenForSolana = async () => {
+    const amount = sendAmount * Math.pow(10, selectedToken.decimal - 1);
+    let transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: wallet.publicKey,
+        toPubkey: new PublicKey(toAddress),
+        lamports: amount, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
+      })
+    );
+    const result = await sendAndConfirmTransaction(connection, transaction, [
+      wallet,
+    ]);
+    return result;
+  };
 
-  //   const toAccount = await splToken.getOrCreateAssociatedTokenAccount(
-  //     connection,
-  //     wallet,
-  //     mint,
-  //     new PublicKey(toAddress)
-  //   );
+  const postTransferToken = async () => {
+    const mint = new PublicKey(selectedToken.tokenName);
+    const amount = sendAmount * Math.pow(10, selectedToken.decimal);
+    console.log(amount);
+    const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
+      connection,
+      wallet,
+      mint,
+      wallet.publicKey
+    );
 
-  //   console.log(mint, fromAccount, toAccount);
+    const toAccount = await splToken.getOrCreateAssociatedTokenAccount(
+      connection,
+      wallet,
+      mint,
+      new PublicKey(toAddress)
+    );
 
-  //   const transaction = await splToken.transfer(
-  //     connection,
-  //     wallet,
-  //     fromAccount.address,
-  //     toAccount.address,
-  //     wallet,
-  //     1
-  //   );
-  //   console.log(transaction);
-  //   setTransactionId(transaction);
-  // };
+    const transaction = await splToken.transfer(
+      connection,
+      wallet,
+      fromAccount.address,
+      toAccount.address,
+      wallet,
+      amount
+    );
+    return transaction;
+    // setTransactionId(transaction);
+  };
 
   // 3UmcizVy9Gsa5QLnDBqh6gqc8wVqKnNbriT1UGttHSoZ
 
   return (
     <>
       <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
-        <div>
-          <p>From</p>
-          <p>{pubKey}</p>
-          <p>To</p>
-          <p>{toAddress}</p>
-          <p>보낼 수량</p>
+        <div className="p-10 break-words">
+          <p className="text-3xl">From</p>
+          <p className="mt-5 text-2xl">{pubKey}</p>
+          <p className="mt-10 text-3xl">To</p>
+          <p className="mt-5 text-2xl">{toAddress}</p>
+          <p className="mt-10 text-3xl">보낼 수량</p>
           {selectedToken && (
-            <p>
-              {sendAmount} {selectedToken.tokenName}
+            <p className="mt-5 text-2xl">
+              {addDecimal(sendAmount, selectedToken.decimal)}{" "}
+              {selectedToken.tokenName}
             </p>
           )}
 
-          <p>Fee</p>
-          <p>{addDecimal(Number(fee))}</p>
-          <p>남은 수량</p>
-          <p>{handleCalculateTokens(sendAmount)}</p>
+          <p className="mt-10 text-3xl">Fee</p>
+          <p className="mt-5 text-2xl">
+            {addDecimal(fee, solanaDecimalLength)} SOL
+          </p>
+          <p className="mt-10 text-3xl">남은 수량</p>
+          {selectedToken && (
+            <p className="mt-5 text-2xl">
+              {selectedToken.tokenName === "SOL"
+                ? remainSolanaAmount
+                : remainTokenAmount}{" "}
+              {selectedToken.tokenName}
+            </p>
+          )}
           <div className="mt-20 text-center">
             <button
               type="button"
               className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
+              onClick={sendToken}
             >
               보내기
             </button>
@@ -379,13 +470,15 @@ export const Portfolio = () => {
                   {selectedToken.tokenName} 보내기
                 </h1>
                 <p className="px-10 mt-10 text-3xl">
-                  잔액 : {addDecimal(selectedToken.balance)}{" "}
+                  잔액 :{" "}
+                  {addDecimal(selectedToken.balance, selectedToken.decimal)}{" "}
                   {selectedToken.tokenName.substr(0, 3).toUpperCase()}
                 </p>
               </div>
               <div className="mt-10">
                 <input
                   type="text"
+                  className="text-3xl"
                   onChange={(e) => setSendAmount(e.target.value)}
                 />
                 <p className="text-right">
@@ -394,7 +487,12 @@ export const Portfolio = () => {
               </div>
               <div className="mt-10 text-3xl">
                 <p className="mb-2">From</p>
-                <input type="text" value={pubKey} readOnly />
+                <input
+                  type="text"
+                  value={pubKey}
+                  className="text-3xl"
+                  readOnly
+                />
               </div>
               <div className="mt-10 text-3xl">
                 <p className="mb-2">To</p>
@@ -404,6 +502,9 @@ export const Portfolio = () => {
                   onChange={(e) => setToAddress(e.target.value)}
                 />
               </div>
+              {!isSolanaToken && toAddress.length > 0 && (
+                <p>이건 솔라나 토큰이 아님</p>
+              )}
               <div className="mt-20 text-center">
                 <button
                   type="button"
@@ -464,7 +565,7 @@ export const Portfolio = () => {
               tokenList.map((item, index) => (
                 <li key={index.toString()} className="py-5 pl-5 border-b-2 ">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center mr-10 text-3xl truncate">
+                    <div className="flex flex-wrap items-center flex-shrink-0 mr-10 text-3xl truncate">
                       {index === 0 ? (
                         <img
                           src={solanaTokenData.imageUrl}
@@ -497,8 +598,7 @@ export const Portfolio = () => {
                     </div>
                     <div className="flex items-center flex-shrink-0">
                       <span className="text-2xl font-bold">
-                        {addDecimal(item.balance)}
-
+                        {item.balance}
                         {index === 0 ? (
                           <span className="ml-5">
                             {item.tokenName.substr(0, 3).toUpperCase()}

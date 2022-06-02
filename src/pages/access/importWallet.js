@@ -34,7 +34,12 @@ export const ImportWallet = (props) => {
 
   useEffect(() => {
     // Solana 네트워크 연결
-    setConnection(new Connection(clusterApiUrl("devnet"), "confirmed"));
+    setConnection(
+      new Connection(
+        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
+        "confirmed"
+      )
+    );
     handleCheckUserLogin();
   }, []);
 
