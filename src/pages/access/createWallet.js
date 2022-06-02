@@ -84,8 +84,7 @@ export const CreateWallet = () => {
 
   return (
     <>
-      <Header />
-      <div className="flex flex-col justify-center w-full h-full min-h-full p-10">
+      <div className="flex flex-col justify-center w-full h-full min-h-full p-10 bg-center bg-cover md:bg-intro-pattern bg-intro-pattern-m">
         {nextStep ? (
           <div>
             <p className="text-4xl font-bold text-center">
@@ -94,12 +93,12 @@ export const CreateWallet = () => {
             <div className="mt-10">
               <input
                 type="password"
-                className="px-10 py-5 text-2xl"
+                className="px-10 py-5 text-2xl border border-gray-500 bg-card-gray"
                 onChange={(e) => setPassword(e.target.value)}
               />
               <input
                 type="password"
-                className="px-10 py-5 mt-5 text-2xl"
+                className="px-10 py-5 mt-5 text-2xl border border-gray-500 bg-card-gray"
                 onChange={(e) => setConfirm(e.target.value)}
               />
             </div>
@@ -110,9 +109,9 @@ export const CreateWallet = () => {
             )}
           </div>
         ) : (
-          <div>
+          <div className="mt-20">
             <p className="text-4xl font-bold">복구 문구 적어 두기</p>
-            <div className="p-10 mt-10 bg-white shadow-xl">
+            <div className="p-10 mt-10 shadow-xl bg-card-gray">
               <ul className="grid grid-cols-2 data-number-list">
                 {arrMnemonic &&
                   arrMnemonic.map((item, index) => (
@@ -125,8 +124,11 @@ export const CreateWallet = () => {
                     </li>
                   ))}
               </ul>
-              <div className="pt-10 mt-10 border-t-2">
-                <button className="btn-text" onClick={onClickCopyMnemonic}>
+              <div className="pt-10 mt-10 text-center border-t-2">
+                <button
+                  className="text-3xl text-center text-white"
+                  onClick={onClickCopyMnemonic}
+                >
                   복사
                 </button>
               </div>
@@ -137,7 +139,7 @@ export const CreateWallet = () => {
         <div className="mt-20">
           {nextStep ? (
             <>
-              <button className="btn-text" onClick={onMoveNextStep}>
+              <button className="btn-line" onClick={onMoveNextStep}>
                 뒤로 가기
               </button>
               <button
@@ -150,7 +152,7 @@ export const CreateWallet = () => {
             </>
           ) : (
             <>
-              <Link to="/" className="btn-text">
+              <Link to="/" className="btn-line">
                 뒤로 가기
               </Link>
               <button className="mt-10 btn" onClick={onMoveNextStep}>

@@ -46,15 +46,15 @@ export const TransactionList = () => {
 
   return (
     <>
-      <div className="absolute w-full px-10 py-8 bg-white">
+      <div className="absolute w-full px-10 py-8 bg-card-gray">
         <Link to="/portfolio">
-          <Icon path={mdiChevronLeft} size={2} color="#000" />
+          <Icon path={mdiChevronLeft} size={2} color="white" />
         </Link>
       </div>
       {loading ? (
         <Speaner />
       ) : (
-        <div className="px-10 pt-48 pb-20">
+        <div className="px-10 pt-48 pb-20 ">
           <h1 className="text-5xl font-bold">Transaction List</h1>
           {transactions.length > 0 ? (
             <ul className="mt-10">
@@ -62,25 +62,27 @@ export const TransactionList = () => {
                 <li
                   key={index.toString()}
                   className={cls(
-                    "flex items-center px-5 py-7 bg-white shadow-xl rounded-xl",
+                    " items-center bg-card-gray shadow-xl rounded-xl",
                     index !== 0 && "mt-5"
                   )}
                 >
-                  <div className="truncate">
-                    <p className="mr-5 text-2xl truncate">{item.signature}</p>
-                    <p className="mt-3 text-2xl font-medium text-green-500">
-                      {item.confirmationStatus}
-                    </p>
-                  </div>
                   <a
                     href={`https://explorer.solana.com/tx/${item.signature}${
-                      process.env.development && "?cluster=devnet"
+                      process.env.NODE_ENV === "development" &&
+                      "?cluster=devnet"
                     }`}
                     target="_blank"
-                    className="cursor-pointer"
+                    className="flex px-5 cursor-pointer py-7"
                     rel="noreferrer"
                   >
-                    <Icon path={mdiChevronRight} size={2} color="#ddd" />
+                    <div className="truncate">
+                      <p className="mr-5 text-2xl truncate">{item.signature}</p>
+                      <p className="mt-3 text-2xl font-medium text-green-500">
+                        {item.confirmationStatus}
+                      </p>
+                    </div>
+
+                    <Icon path={mdiChevronRight} size={3} color="#ddd" />
                   </a>
                 </li>
               ))}

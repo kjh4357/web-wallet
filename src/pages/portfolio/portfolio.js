@@ -478,7 +478,7 @@ export const Portfolio = () => {
               <div className="mt-10">
                 <input
                   type="text"
-                  className="text-3xl"
+                  className="text-2xl border border-gray-500 bg-card-gray"
                   onChange={(e) => setSendAmount(e.target.value)}
                 />
                 <p className="text-right">
@@ -490,7 +490,7 @@ export const Portfolio = () => {
                 <input
                   type="text"
                   value={pubKey}
-                  className="text-3xl"
+                  className="text-2xl border border-gray-500 bg-card-gray"
                   readOnly
                 />
               </div>
@@ -498,12 +498,15 @@ export const Portfolio = () => {
                 <p className="mb-2">To</p>
                 <input
                   type="text"
+                  className="text-2xl border border-gray-500 bg-card-gray"
                   value={toAddress}
                   onChange={(e) => setToAddress(e.target.value)}
                 />
               </div>
               {!isSolanaToken && toAddress.length > 0 && (
-                <p>이건 솔라나 토큰이 아님</p>
+                <p className="mt-3 text-xl text-red-500">
+                  올바른 주소가 아닙니다
+                </p>
               )}
               <div className="mt-20 text-center">
                 <button
@@ -516,17 +519,17 @@ export const Portfolio = () => {
               </div>
               <button
                 type="button"
-                className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+                className="absolute text-2xl font-medium text-white outline-none top-5 right-5"
                 onClick={() => setSendTokenModal(false)}
               >
-                <Icon path={mdiClose} size={1.5} color="black" />
+                <Icon path={mdiClose} size={1.5} color="white" />
               </button>
             </div>
           ))}
       </Modal>
       <Header />
       <div className="px-10 pt-40 pb-20">
-        <div className="flex flex-col items-center px-5 py-16 bg-white shadow-xl rounded-xl">
+        <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl">
           <div className="w-48 h-48 bg-red-800 rounded-full">
             {pubKey && (
               <img
@@ -546,7 +549,7 @@ export const Portfolio = () => {
             onClick={onClickTextCopy}
             className="flex items-center justify-center mt-2 rounded-full"
           >
-            <Icon path={mdiFileMultipleOutline} size={1.5} color="#603669" />
+            <Icon path={mdiFileMultipleOutline} size={1.5} color="#fff" />
           </button>
           <button
             onClick={() => onClickOpenTokenSendModal(tokenList[0])}
@@ -558,14 +561,17 @@ export const Portfolio = () => {
             <span className="inline-block mt-2 text-2xl font-bold">보내기</span>
           </button>
         </div>
-        <div className="p-10 mt-10 bg-white shadow-lg x-10 rounded-xl">
+        <div className="p-10 mt-10 shadow-lg bg-card-gray x-10 rounded-xl">
           <h2 className="mb-10 text-4xl font-black">자산</h2>
-          <ul className="border-t-2">
+          <ul className="border-t border-gray-600">
             {tokenList.length > 0 &&
               tokenList.map((item, index) => (
-                <li key={index.toString()} className="py-5 pl-5 border-b-2 ">
+                <li
+                  key={index.toString()}
+                  className="py-5 pl-5 border-b border-gray-600"
+                >
                   <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap items-center flex-shrink-0 mr-10 text-3xl truncate">
+                    <div className="flex flex-wrap items-center flex-shrink-0 mr-10 text-3xl truncate ">
                       {index === 0 ? (
                         <img
                           src={solanaTokenData.imageUrl}
@@ -619,7 +625,7 @@ export const Portfolio = () => {
                   <div className="mt-5 text-center">
                     <button
                       onClick={() => onClickOpenTokenSendModal(item)}
-                      className="inline-block px-8 py-3 text-2xl text-black border-2 rounded-md cursor-pointer hover-gradient"
+                      className="inline-block px-10 py-5 text-2xl text-white border-gray-600 rounded-full cursor-pointer btn-gradient"
                     >
                       보내기
                     </button>

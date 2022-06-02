@@ -137,7 +137,7 @@ export const ImportWallet = (props) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center h-full min-h-full p-10">
+      <div className="flex flex-col items-center justify-center h-full min-h-full p-10 bg-center bg-cover md:bg-intro-pattern bg-intro-pattern-m">
         {userLogined && (
           <div className="absolute top-0 left-0 w-full">
             <ul className="flex w-full text-center">
@@ -175,12 +175,12 @@ export const ImportWallet = (props) => {
                   지갑 생성시 저장한 시드문구를 입력하세요
                 </p>
                 <textarea
-                  className="w-full h-56 p-10 mt-10 text-3xl"
+                  className="w-full h-56 p-10 mt-10 text-3xl bg-card-gray"
                   value={userMnemonic}
                   onChange={onChangeMnemonic}
                 ></textarea>
                 <div className="flex flex-col w-full mt-20">
-                  <Link to="/" className="btn-text">
+                  <Link to="/" className="btn-line">
                     뒤로 가기
                   </Link>
                   <button
@@ -194,7 +194,9 @@ export const ImportWallet = (props) => {
               </div>
             ) : (
               <div>
-                <p className="text-3xl">비밀번호 설정</p>
+                <p className="text-3xl text-center">
+                  지갑 비밀번호를 설정해주세요
+                </p>
                 <div className="mt-10">
                   <input
                     type="password"
@@ -214,7 +216,7 @@ export const ImportWallet = (props) => {
                 )}
                 <div className="flex flex-col w-full mt-20">
                   <button
-                    className="btn-text"
+                    className="btn-line"
                     onClick={() => setLoginMnemonic(false)}
                   >
                     뒤로 가기

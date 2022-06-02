@@ -2,12 +2,11 @@ module.exports = {
   content: ["./src/pages/**/*.{js,html}", "./src/components/**/*.{js,html}"],
   theme: {
     extend: {
-      "loa-logo": "url('../public/img/ico_logo.svg')",
+      backgroundImage: {
+        "intro-pattern": "url('./assets/img/bg-main.png')",
+        "intro-pattern-m": "url('./assets/img/bg-main_m.png')",
+      },
     },
-    backgroundColor: (theme) => ({
-      ...theme("colors"),
-      "intro-bg": "#f3f1f1",
-    }),
   },
   plugins: [],
 };
