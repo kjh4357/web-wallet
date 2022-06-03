@@ -27,13 +27,12 @@ export default function Header() {
     const data = window.localStorage.getItem("data");
 
     if (secure == null || data == null) {
-      console.log("No wallet password.");
       return;
     }
     if (password) {
       const hashedText = await getHashedValue(password);
       if (hashedText !== secure) {
-        toast.error("잘못된 패스워드 입니다.");
+        toast.error("패스워드가 일치하지 않습니다.");
         return;
       }
       onClickLogout();
@@ -68,7 +67,7 @@ export default function Header() {
             <br /> 패스워드를 입력해주세요.
           </p>
           <input
-            type="text"
+            type="password"
             className="mt-10 text-box"
             onChange={(e) => setPassword(e.target.value)}
           />
