@@ -86,7 +86,7 @@ export const CreateWallet = () => {
     <>
       <div className="flex flex-col justify-center w-full h-full min-h-full p-10 bg-center bg-cover md:bg-intro-pattern bg-intro-pattern-m">
         {nextStep ? (
-          <div>
+          <div className=" md:w-full md:mx-auto md:max-w-420">
             <p className="text-4xl font-bold text-center">
               지갑의 비밀번호 설정
             </p>
@@ -109,24 +109,24 @@ export const CreateWallet = () => {
             )}
           </div>
         ) : (
-          <div className="mt-20">
+          <div className="mt-20 md:w-full md:mx-auto md:max-w-640">
             <p className="text-4xl font-bold">복구 문구 적어 두기</p>
-            <div className="p-10 mt-10 shadow-xl bg-card-gray">
+            <div className="p-10 mt-10 shadow-xl bg-card-gray md:py-5">
               <ul className="grid grid-cols-2 data-number-list">
                 {arrMnemonic &&
                   arrMnemonic.map((item, index) => (
                     <li
                       key={index}
                       data-index={index + 1}
-                      className="py-5 text-3xl"
+                      className="py-5 text-3xl md:text-2xl lg:text-xl xl:py-3"
                     >
                       {item}
                     </li>
                   ))}
               </ul>
-              <div className="pt-10 mt-10 text-center border-t-2">
+              <div className="pt-10 mt-10 text-center border-t border-gray-400 md:pt-5 md:mt-5">
                 <button
-                  className="text-3xl text-center text-white"
+                  className="text-3xl text-center text-white md:text-2xl"
                   onClick={onClickCopyMnemonic}
                 >
                   복사
@@ -136,7 +136,7 @@ export const CreateWallet = () => {
           </div>
         )}
 
-        <div className="mt-20">
+        <div className="mt-20 md:w-full md:mx-auto md:max-w-420 md:mt-10">
           {nextStep ? (
             <>
               <button className="btn-line" onClick={onMoveNextStep}>

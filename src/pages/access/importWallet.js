@@ -145,7 +145,7 @@ export const ImportWallet = (props) => {
                 <li
                   key={index.toString()}
                   className={cls(
-                    "w-1/2  bg-white text-3xl",
+                    "w-1/2  bg-white text-3xl xl:text-xl text-black",
                     index === tabIndex ? "active" : null
                   )}
                 >
@@ -153,7 +153,7 @@ export const ImportWallet = (props) => {
                     type="button"
                     onClick={() => setTabIndex(index)}
                     className={cls(
-                      "w-full py-10",
+                      "w-full py-10 md:py-5",
                       index === tabIndex
                         ? "loa-gradient text-white font-bold"
                         : ""
@@ -175,7 +175,7 @@ export const ImportWallet = (props) => {
                   지갑 생성시 저장한 시드문구를 입력하세요
                 </p>
                 <textarea
-                  className="w-full h-56 p-10 mt-10 text-3xl bg-card-gray"
+                  className="w-full h-56 p-10 mt-10 text-3xl resize-none bg-card-gray"
                   value={userMnemonic}
                   onChange={onChangeMnemonic}
                 ></textarea>
@@ -193,19 +193,19 @@ export const ImportWallet = (props) => {
                 </div>
               </div>
             ) : (
-              <div>
+              <div className="max-w-420">
                 <p className="text-3xl text-center">
                   지갑 비밀번호를 설정해주세요
                 </p>
                 <div className="mt-10">
                   <input
                     type="password"
-                    className="px-10 py-5 text-2xl"
+                    className="text-box"
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <input
                     type="password"
-                    className="px-10 py-5 mt-5 text-2xl"
+                    className="mt-10 text-box"
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>
@@ -234,12 +234,12 @@ export const ImportWallet = (props) => {
             <div className="mt-10">
               <input
                 type="password"
-                className="px-10 py-5 text-2xl"
+                className="text-box"
                 onChange={onChangeWalletPassword}
               />
             </div>
             <div className="flex flex-col w-full mt-20">
-              <Link to="/" className="btn-text">
+              <Link to="/" className="btn-line">
                 뒤로 가기
               </Link>
               <button className="mt-10 btn" onClick={postLoginWalletPassword}>

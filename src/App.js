@@ -34,6 +34,7 @@ const App = () => {
   return (
     <Suspense fallback={<span>Loading</span>}>
       <ToastContainer
+        theme="dark"
         position="top-center"
         autoClose={2000}
         hideProgressBar={false}

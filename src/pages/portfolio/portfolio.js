@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import crypto from "crypto";
 import { derivePath } from "ed25519-hd-key";
 import KeypairContext from "@/context/keypair.context";
+import { Speaner } from "@/components/speaner";
 
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 
@@ -40,7 +41,8 @@ export const Portfolio = () => {
   const [receiptModal, setReceiptModal] = useState(false);
   const [typedMessage, setTypedMessage] = useState(false);
   const [isSolanaToken, setIsSolanaToken] = useState(false);
-
+  const [loading, setLoading] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
@@ -65,12 +67,17 @@ export const Portfolio = () => {
     );
     getLocalStorageUserData();
     getSessionStorageCoinList();
+    handleObservedWalletLocked();
   }, []);
 
   useEffect(() => {
     importWallet();
     getSolanaBalance();
   }, [pubKey, userMnemonic]);
+
+  const handleObservedWalletLocked = () => {
+    setIsLocked(localStorage.getItem("locked"));
+  };
 
   const getLocalStorageUserData = () => {
     if (localStorage.getItem("data") === null) {
@@ -177,10 +184,11 @@ export const Portfolio = () => {
           let coinData = await handleFindTokenData(
             item.account.data.parsed.info.mint
           );
+          console.log(item);
           setTokenList((prev) => [
             ...prev,
             {
-              tokenName: item.account.data.parsed.info.mint,
+              tokenName: coinData ? coinData.symbol : "UNKNOWN",
               balance: addDecimal(
                 item.account.data.parsed.info.tokenAmount.uiAmount,
                 item.account.data.parsed.info.tokenAmount.decimals
@@ -326,6 +334,7 @@ export const Portfolio = () => {
   };
 
   const getTransactionFee = async () => {
+    setLoading((prev) => !prev);
     // 솔라나 토큰 Transaction Fee
     let transaction = new Transaction().add(
       SystemProgram.transfer({
@@ -344,7 +353,7 @@ export const Portfolio = () => {
     );
     // const fee = addDecimal(response.value, solanaDecimalLength);
     // console.log(fee);
-
+    setLoading((prev) => !prev);
     return response.value;
   };
 
@@ -366,6 +375,7 @@ export const Portfolio = () => {
   };
 
   const postTransferTokenForSolana = async () => {
+    setLoading((prev) => !prev);
     const amount = sendAmount * Math.pow(10, selectedToken.decimal - 1);
     let transaction = new Transaction().add(
       SystemProgram.transfer({
@@ -377,10 +387,12 @@ export const Portfolio = () => {
     const result = await sendAndConfirmTransaction(connection, transaction, [
       wallet,
     ]);
+    setLoading((prev) => !prev);
     return result;
   };
 
   const postTransferToken = async () => {
+    setLoading((prev) => !prev);
     const mint = new PublicKey(selectedToken.tokenName);
     const amount = sendAmount * Math.pow(10, selectedToken.decimal);
     console.log(amount);
@@ -406,14 +418,13 @@ export const Portfolio = () => {
       wallet,
       amount
     );
+    setLoading((prev) => !prev);
     return transaction;
-    // setTransactionId(transaction);
   };
-
-  // 3UmcizVy9Gsa5QLnDBqh6gqc8wVqKnNbriT1UGttHSoZ
 
   return (
     <>
+      {loading && <Speaner />}
       <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
         <div className="p-10 break-words">
           <p className="text-3xl">From</p>
@@ -528,9 +539,9 @@ export const Portfolio = () => {
           ))}
       </Modal>
       <Header />
-      <div className="px-10 pt-40 pb-20">
-        <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl">
-          <div className="w-48 h-48 bg-red-800 rounded-full">
+      <div className="px-10 pt-40 pb-20 md:px-20 md:pt-32">
+        <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10">
+          <div className="w-48 h-48 bg-red-800 rounded-full md:w-24 md:h-24 md:flex-shrink-0">
             {pubKey && (
               <img
                 className="rounded-full"
@@ -539,30 +550,41 @@ export const Portfolio = () => {
               />
             )}
           </div>
-          <p
-            id="publicKey"
-            className="px-5 py-2 mt-5 text-2xl font-medium break-all"
-          >
-            {pubKey}
-          </p>
-          <button
-            onClick={onClickTextCopy}
-            className="flex items-center justify-center mt-2 rounded-full"
-          >
-            <Icon path={mdiFileMultipleOutline} size={1.5} color="#fff" />
-          </button>
-          <button
-            onClick={() => onClickOpenTokenSendModal(tokenList[0])}
-            className="mt-10 text-center"
-          >
-            <span className="flex items-center justify-center w-20 h-20 rounded-full loa-gradient">
-              <Icon path={mdiRedo} size={2} color="white" />
-            </span>
-            <span className="inline-block mt-2 text-2xl font-bold">보내기</span>
-          </button>
+          <div className="flex flex-col items-center md:flex-row md:border-l md:border-gray-400 md:ml-10 md:pl-10 md:justify-between md:w-full">
+            <div className="flex flex-col items-center md:items-start md:justify-start">
+              <p
+                id="publicKey"
+                className="px-5 py-2 mt-5 text-2xl font-medium break-all md:mt-0 md:py-0 md:px-0 md:text-xl"
+              >
+                {pubKey}
+              </p>
+              <button
+                onClick={onClickTextCopy}
+                className="flex items-center justify-center mt-2 rounded-full md:mt-5 md:flex-shrink-0"
+              >
+                <Icon path={mdiFileMultipleOutline} size={1.5} color="#fff" />
+              </button>
+            </div>
+            <button
+              onClick={() => onClickOpenTokenSendModal(tokenList[0])}
+              className="mt-10 text-center md:mt-0 md:ml-10"
+            >
+              <span className="flex items-center justify-center w-20 h-20 rounded-full loa-gradient md:rounded-md md:px-5 md:w-auto md:h-auto">
+                <Icon path={mdiRedo} size={1.5} color="white" />
+                <span className="hidden py-4 mt-2 ml-5 text-2xl font-bold md:inline-block md:text-xl md:mt-0">
+                  보내기
+                </span>
+              </span>
+              <span className="inline-block mt-2 text-2xl font-bold md:hidden">
+                보내기
+              </span>
+            </button>
+          </div>
         </div>
         <div className="p-10 mt-10 shadow-lg bg-card-gray x-10 rounded-xl">
-          <h2 className="mb-10 text-4xl font-black">자산</h2>
+          <h2 className="mb-10 text-4xl font-black md:text-2xl md:mb-5">
+            자산
+          </h2>
           <ul className="border-t border-gray-600">
             {tokenList.length > 0 &&
               tokenList.map((item, index) => (
@@ -576,13 +598,13 @@ export const Portfolio = () => {
                         <img
                           src={solanaTokenData.imageUrl}
                           alt=""
-                          className="w-16 h-16 mr-4 rounded-full"
+                          className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
                       ) : item.data ? (
                         <img
                           src={item.data.logoURI}
                           alt=""
-                          className="w-16 h-16 mr-4 rounded-full"
+                          className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
                       ) : (
                         <img
@@ -590,11 +612,11 @@ export const Portfolio = () => {
                             item.tokenName
                           )}`}
                           alt=""
-                          className="w-16 h-16 mr-4 rounded-full"
+                          className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
                       )}
 
-                      <span className="font-bold truncate">
+                      <span className="text-3xl font-bold truncate lg:text-2xl">
                         {index === 0
                           ? solanaTokenData.name
                           : item.data
@@ -615,17 +637,25 @@ export const Portfolio = () => {
                       </span>
                       <button
                         type="button"
-                        className="cursor-pointer"
+                        className="cursor-pointer md:hidden"
                         onClick={onClickMoveTransactionList}
                       >
                         <Icon path={mdiChevronRight} size={2} color="#ddd" />
                       </button>
                     </div>
                   </div>
-                  <div className="mt-5 text-center">
+                  <div className="mt-5 text-center md:text-right md:flex md:justify-between">
+                    <button
+                      type="button"
+                      className="items-center justify-center hidden text-xl text-gray-400 cursor-pointer md:flex text-gray"
+                      onClick={onClickMoveTransactionList}
+                    >
+                      더 많은 작업
+                      <Icon path={mdiChevronRight} size={1} color="#9CA3AF" />
+                    </button>
                     <button
                       onClick={() => onClickOpenTokenSendModal(item)}
-                      className="inline-block px-10 py-5 text-2xl text-white border-gray-600 rounded-full cursor-pointer btn-gradient"
+                      className="inline-block px-10 py-5 text-2xl text-white border-gray-600 rounded-full cursor-pointer btn-gradient md:text-xl md:rounded-md md:py-3"
                     >
                       보내기
                     </button>

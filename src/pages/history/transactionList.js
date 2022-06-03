@@ -5,7 +5,7 @@ import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
 import Icon from "@mdi/react";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { useContext, useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const TransactionList = () => {
   const { keypair } = useContext(KeypairContext);
@@ -13,7 +13,7 @@ export const TransactionList = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  console.log(keypair);
+
   useEffect(() => {
     // Solana 네트워크 연결
     setConnection(
@@ -62,7 +62,7 @@ export const TransactionList = () => {
                 <li
                   key={index.toString()}
                   className={cls(
-                    " items-center bg-card-gray shadow-xl rounded-xl",
+                    "flex items-center bg-card-gray shadow-xl rounded-xl",
                     index !== 0 && "mt-5"
                   )}
                 >
@@ -72,17 +72,19 @@ export const TransactionList = () => {
                       "?cluster=devnet"
                     }`}
                     target="_blank"
-                    className="flex px-5 cursor-pointer py-7"
+                    className="flex items-center justify-between w-full px-5 cursor-pointer py-7"
                     rel="noreferrer"
                   >
                     <div className="truncate">
-                      <p className="mr-5 text-2xl truncate">{item.signature}</p>
-                      <p className="mt-3 text-2xl font-medium text-green-500">
+                      <p className="mr-5 text-2xl truncate md:text-xl">
+                        {item.signature}
+                      </p>
+                      <p className="mt-3 text-2xl font-medium text-green-500 md:text-xl">
                         {item.confirmationStatus}
                       </p>
                     </div>
 
-                    <Icon path={mdiChevronRight} size={3} color="#ddd" />
+                    <Icon path={mdiChevronRight} size={"30px"} color="#ddd" />
                   </a>
                 </li>
               ))}

@@ -20,6 +20,9 @@ html, body {
 #root {
   height: 100%;  min-height: 100%;
 }
+.speaner {
+  z-index: 9999;
+}
 .translate-center {
   transform: translate(-50%, -50%);
 }
@@ -34,10 +37,13 @@ html, body {
    @apply border-2 w-full px-5 py-3
   }
   .btn {
-    @apply flex items-center justify-center w-full rounded-full bg-purple-600 text-white h-28 text-3xl font-bold btn-gradient
+    @apply flex items-center justify-center w-full rounded-full bg-purple-600 text-white h-28 md:h-16 md:text-xl text-3xl font-bold btn-gradient
   }
   .btn-line {
-    @apply flex items-center justify-center w-full rounded-full text-white h-28 text-3xl font-bold btn-border-line
+    @apply flex items-center justify-center w-full rounded-full text-white h-28 md:h-16 md:text-xl text-3xl font-bold btn-border-line
+  }
+  .text-box {
+    @apply px-10 py-5 text-2xl bg-card-gray border border-gray-400 md:py-4 
   }
  
   .btn-text {
@@ -46,6 +52,9 @@ html, body {
   @variants responsive {
     .min-w-640 {
       min-width: 640px;
+    }
+    .max-w-420 {
+      max-width: 420px;
     }
     .max-w-640 {
       max-width: 640px;
