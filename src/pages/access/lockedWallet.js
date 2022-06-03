@@ -17,7 +17,7 @@ export const LockedWallet = () => {
   const [deleteText, setDeleteText] = useState("");
 
   const onChangeWalletPassword = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     setWalletPassword(value);
   };
 
@@ -26,22 +26,16 @@ export const LockedWallet = () => {
     const data = window.localStorage.getItem("data");
 
     if (secure == null || data == null) {
-      console.log("No wallet password.");
       return;
     }
     if (walletPassword) {
       const hashedText = await getHashedValue(walletPassword);
       if (hashedText !== secure) {
-        console.log("Password incorrect.");
         toast.error("비밀번호가 맞지 않습니다.");
         return;
       }
-      console.log("Password correct.");
       localStorage.removeItem("locked");
       handlePasswordLogin();
-      // const userMnemonic = decipher(data, hashedText.substring(0, 16));
-      // console.log(userMnemonic);
-      // setUserMnemonic(userMnemonic);
     } else {
       toast.error("비밀번호를 입력하세요");
     }

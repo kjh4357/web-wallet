@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import { Account, Keypair } from "@solana/web3.js";
-import Header from "@/components/header";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import crypto from "crypto";
@@ -43,8 +42,6 @@ export const CreateWallet = () => {
 
   const onMoveNextStep = () => {
     setNextStep((prev) => !prev);
-    // await sessionStorage.setItem("pubKey", account);
-    // navigate("/portfolio");
   };
 
   const onClickCopyMnemonic = () => {
@@ -78,7 +75,6 @@ export const CreateWallet = () => {
     const encrypt = crypto.createCipheriv("aes-128-ecb", key, "");
     const encryptResult =
       encrypt.update(text, "utf8", "base64") + encrypt.final("base64");
-    console.log(encryptResult);
     return encryptResult;
   };
 

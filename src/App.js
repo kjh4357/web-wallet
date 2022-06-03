@@ -34,10 +34,8 @@ const App = () => {
     if (isLocked && isLogined) {
       navigate("/locked");
     } else if (!isLocked && isLogined) {
-      console.log("1");
       navigate("/portfolio");
     } else {
-      console.log("2");
       navigate("/");
     }
   }, [isLocked, isLogined]);

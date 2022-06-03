@@ -15,10 +15,8 @@ export const TransactionList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Solana 네트워크 연결
     setConnection(
       new Connection(
-        //clusterApiUrl('mainnet-beta'),
         clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
         "confirmed"
       )

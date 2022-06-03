@@ -113,12 +113,10 @@ export const Portfolio = () => {
   }, [allTokenList]);
 
   const handleFindTokenData = async (tokenAddress) => {
-    console.log(allTokenList);
     if (allTokenList) {
       const res = await allTokenList.tokens.find(
         (item) => item.address === tokenAddress
       );
-      console.log(res);
       return res;
     }
   };
@@ -182,14 +180,12 @@ export const Portfolio = () => {
 
       const response = await getUserTokens(data);
       if (response.status === 200) {
-        console.log(response.data.result);
         const userTokenList = response.data.result;
 
         userTokenList.map(async (item) => {
           let coinData = await handleFindTokenData(
             item.account.data.parsed.info.mint
           );
-          console.log(item);
           setTokenList((prev) => [
             ...prev,
             {
@@ -205,7 +201,6 @@ export const Portfolio = () => {
             },
           ]);
         });
-        console.log(tokenList);
       }
     }
     // setTokens(response.data.result);
@@ -292,7 +287,6 @@ export const Portfolio = () => {
     if (sendAmount) {
       if (toAddress) {
         if (isSolanaToken) {
-          console.log(selectedToken);
           const fees = await getTransactionFee();
           setFee(addDecimal(fees, solanaDecimalLength));
           if (selectedToken.tokenName === "SOL") {
@@ -327,9 +321,6 @@ export const Portfolio = () => {
         } else {
           toast.error("올바른 토큰 주소가 아닙니다.");
         }
-
-        // setReceiptModal(true);
-        // setSendTokenModal(false);
       } else {
         toast.error("토큰을 보낼 주소를 적어주세요");
       }
@@ -356,8 +347,6 @@ export const Portfolio = () => {
       transaction.compileMessage(),
       "confirmed"
     );
-    // const fee = addDecimal(response.value, solanaDecimalLength);
-    // console.log(fee);
     setLoading((prev) => !prev);
     return response.value;
   };
@@ -367,22 +356,16 @@ export const Portfolio = () => {
     const data = window.localStorage.getItem("data");
 
     if (secure == null || data == null) {
-      console.log("No wallet password.");
       return;
     }
     if (password) {
       const hashedText = await getHashedValue(password);
       if (hashedText !== secure) {
-        console.log("Password incorrect.");
         toast.error("비밀번호가 맞지 않습니다.");
         return;
       }
-      console.log("Password correct.");
       sendToken();
       setPasswordModal(false);
-      // const userMnemonic = decipher(data, hashedText.substring(0, 16));
-      // console.log(userMnemonic);
-      // setUserMnemonic(userMnemonic);
     }
   };
 
@@ -392,7 +375,6 @@ export const Portfolio = () => {
   };
 
   const sendToken = async () => {
-    console.log(selectedToken);
     if (selectedToken.tokenName === "SOL") {
       const res = await postTransferTokenForSolana();
       if (res) {
@@ -429,7 +411,6 @@ export const Portfolio = () => {
     setLoading((prev) => !prev);
     const mint = new PublicKey(selectedToken.tokenName);
     const amount = sendAmount * Math.pow(10, selectedToken.decimal);
-    console.log(amount);
     const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
       connection,
       wallet,

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
+import { clusterApiUrl, Connection } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
 import { Link, useNavigate } from "react-router-dom";
-import { derivePath } from "ed25519-hd-key";
 import { toast } from "react-toastify";
 import crypto from "crypto";
 import util from "util";
@@ -42,7 +40,6 @@ export const ImportWallet = (props) => {
   }, []);
 
   const handleCheckUserLogin = () => {
-    console.log(localStorage.getItem("data") ? true : false);
     setUserLogined(localStorage.getItem("data") ? true : false);
   };
 
@@ -55,7 +52,7 @@ export const ImportWallet = (props) => {
   };
 
   const onChangeWalletPassword = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     setWalletPassword(value);
   };
 
@@ -73,21 +70,15 @@ export const ImportWallet = (props) => {
     const data = window.localStorage.getItem("data");
 
     if (secure == null || data == null) {
-      console.log("No wallet password.");
       return;
     }
     if (walletPassword) {
       const hashedText = await getHashedValue(walletPassword);
       if (hashedText !== secure) {
-        console.log("Password incorrect.");
         toast.error("비밀번호가 맞지 않습니다.");
         return;
       }
-      console.log("Password correct.");
       handlePasswordLogin();
-      // const userMnemonic = decipher(data, hashedText.substring(0, 16));
-      // console.log(userMnemonic);
-      // setUserMnemonic(userMnemonic);
     }
   };
 
@@ -98,7 +89,6 @@ export const ImportWallet = (props) => {
   }, [userMnemonic]);
 
   const handlePasswordLogin = async () => {
-    // await importWallet();
     setLocalStoragePublicKey();
     navigate("/portfolio");
   };
@@ -112,7 +102,6 @@ export const ImportWallet = (props) => {
     const encrypt = crypto.createCipheriv("aes-128-ecb", key, "");
     const encryptResult =
       encrypt.update(text, "utf8", "base64") + encrypt.final("base64");
-    console.log(encryptResult);
     return encryptResult;
   };
 

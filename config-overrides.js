@@ -13,7 +13,6 @@ function myOver(webpackConfig) {
     type: "javascript/auto",
   });
 
-  console.log(webpackConfig);
   return webpackConfig;
 }
 
