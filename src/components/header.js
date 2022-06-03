@@ -21,6 +21,7 @@ export default function Header() {
 
   const onClickWalletLocking = () => {
     localStorage.setItem("locked", true);
+    navigate("/locked");
   };
 
   return (
