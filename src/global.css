@@ -43,7 +43,7 @@ html, body {
     @apply flex items-center justify-center w-full rounded-full text-white h-28 md:h-16 md:text-xl text-3xl font-bold btn-border-line
   }
   .text-box {
-    @apply px-10 py-5 text-2xl bg-card-gray border border-gray-400 md:py-4 
+    @apply px-10 py-5 text-2xl bg-card-gray border border-gray-400 md:py-4  lg:py-2 md:px-5
   }
  
   .btn-text {
@@ -58,6 +58,9 @@ html, body {
     }
     .max-w-640 {
       max-width: 640px;
+    }
+    .max-w-1440 {
+      max-width: 1440px;
     }
   }
   @variants hover {

@@ -18,14 +18,12 @@ export const ImportWallet = (props) => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState();
   const [userMnemonic, setUserMnemonic] = useState("");
-  const [userAddress, setUserAddress] = useState();
   const [userLogined, setUserLogined] = useState(false);
   const [loginMnemonic, setLoginMnemonic] = useState(false);
   const [walletPassword, setWalletPassword] = useState(null);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [tabIndex, setTabIndex] = useState(0);
-  const [wallet, setWallet] = useState();
   const [isInValid, setIsInValid] = useState(false);
 
   useEffect(() => {

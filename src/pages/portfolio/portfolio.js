@@ -30,8 +30,11 @@ import crypto from "crypto";
 import { derivePath } from "ed25519-hd-key";
 import KeypairContext from "@/context/keypair.context";
 import { Speaner } from "@/components/speaner";
+import util from "util";
 
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
+const pbkdf2Promise = util.promisify(crypto.pbkdf2);
+const loop = 104901;
 
 export const Portfolio = () => {
   const navigate = useNavigate();
@@ -39,6 +42,7 @@ export const Portfolio = () => {
   const [pubKey, setPubkey] = useState(null);
   const [sendTokenModal, setSendTokenModal] = useState(false);
   const [receiptModal, setReceiptModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
   const [typedMessage, setTypedMessage] = useState(false);
   const [isSolanaToken, setIsSolanaToken] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -48,6 +52,7 @@ export const Portfolio = () => {
   const [selectedToken, setSelectedToken] = useState(null);
   const [solanaTokenData, setSolanaTokenData] = useState(null);
   const [toAddress, setToAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [sendAmount, setSendAmount] = useState("");
   const [solanaAmount, setSolanaAmount] = useState(null);
   const [remainSolanaAmount, setRemainSolanaAmount] = useState(null);
@@ -357,6 +362,35 @@ export const Portfolio = () => {
     return response.value;
   };
 
+  const onClickCheckValidPassword = async () => {
+    const secure = window.localStorage.getItem("secure");
+    const data = window.localStorage.getItem("data");
+
+    if (secure == null || data == null) {
+      console.log("No wallet password.");
+      return;
+    }
+    if (password) {
+      const hashedText = await getHashedValue(password);
+      if (hashedText !== secure) {
+        console.log("Password incorrect.");
+        toast.error("비밀번호가 맞지 않습니다.");
+        return;
+      }
+      console.log("Password correct.");
+      sendToken();
+      setPasswordModal(false);
+      // const userMnemonic = decipher(data, hashedText.substring(0, 16));
+      // console.log(userMnemonic);
+      // setUserMnemonic(userMnemonic);
+    }
+  };
+
+  const getHashedValue = async (text) => {
+    const key = await pbkdf2Promise(text, "", loop, 64, "sha512");
+    return key.toString("base64");
+  };
+
   const sendToken = async () => {
     console.log(selectedToken);
     if (selectedToken.tokenName === "SOL") {
@@ -425,27 +459,53 @@ export const Portfolio = () => {
   return (
     <>
       {loading && <Speaner />}
+      <Modal isModalOpen={passwordModal} setModalOpen={setPasswordModal}>
+        <div className="mt-5">
+          <h1>비밀번호 확인</h1>{" "}
+          <input
+            type="password"
+            className="mt-3 text-box"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md lg:text-lg lg:h-12 loa-gradient"
+              onClick={onClickCheckValidPassword}
+            >
+              계속하기
+            </button>
+          </div>
+          <button
+            type="button"
+            className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+            onClick={() => setReceiptModal(false)}
+          >
+            <Icon path={mdiClose} size={1.5} color="white" />
+          </button>
+        </div>
+      </Modal>
       <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
         <div className="p-10 break-words">
-          <p className="text-3xl">From</p>
-          <p className="mt-5 text-2xl">{pubKey}</p>
-          <p className="mt-10 text-3xl">To</p>
-          <p className="mt-5 text-2xl">{toAddress}</p>
-          <p className="mt-10 text-3xl">보낼 수량</p>
+          <p className="text-3xl md:text-xl">From</p>
+          <p className="mt-5 text-2xl md:text-lg md:mt-2">{pubKey}</p>
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">To</p>
+          <p className="mt-5 text-2xl md:text-lg md:mt-2">{toAddress}</p>
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">보낼 수량</p>
           {selectedToken && (
-            <p className="mt-5 text-2xl">
+            <p className="mt-5 text-2xl md:text-lg md:mt-2">
               {addDecimal(sendAmount, selectedToken.decimal)}{" "}
               {selectedToken.tokenName}
             </p>
           )}
 
-          <p className="mt-10 text-3xl">Fee</p>
-          <p className="mt-5 text-2xl">
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">Fee</p>
+          <p className="mt-5 text-2xl md:text-lg md:mt-2">
             {addDecimal(fee, solanaDecimalLength)} SOL
           </p>
-          <p className="mt-10 text-3xl">남은 수량</p>
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">남은 수량</p>
           {selectedToken && (
-            <p className="mt-5 text-2xl">
+            <p className="mt-5 text-2xl md:text-lg md:mt-2">
               {selectedToken.tokenName === "SOL"
                 ? remainSolanaAmount
                 : remainTokenAmount}{" "}
@@ -455,8 +515,8 @@ export const Portfolio = () => {
           <div className="mt-20 text-center">
             <button
               type="button"
-              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
-              onClick={sendToken}
+              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md lg:text-xl lg:h-16 loa-gradient"
+              onClick={() => setPasswordModal(true)}
             >
               보내기
             </button>
@@ -466,7 +526,7 @@ export const Portfolio = () => {
             className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
             onClick={() => setReceiptModal(false)}
           >
-            <Icon path={mdiClose} size={1.5} color="black" />
+            <Icon path={mdiClose} size={1.5} color="white" />
           </button>
         </div>
       </Modal>
@@ -539,7 +599,7 @@ export const Portfolio = () => {
           ))}
       </Modal>
       <Header />
-      <div className="px-10 pt-40 pb-20 md:px-20 md:pt-32">
+      <div className="px-10 pt-40 pb-20 mx-auto md:px-20 md:pt-32 max-w-1440">
         <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10">
           <div className="w-48 h-48 bg-red-800 rounded-full md:w-24 md:h-24 md:flex-shrink-0">
             {pubKey && (
