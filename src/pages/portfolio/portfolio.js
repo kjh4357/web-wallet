@@ -104,12 +104,14 @@ export const Portfolio = () => {
   };
 
   useEffect(() => {
-    setSolanaTokenData({
-      name: "Solana",
-      symbol: "SOL",
-      decimal: solanaDecimalLength,
-      imageUrl: allTokenList.logoURI,
-    });
+    if (allTokenList) {
+      setSolanaTokenData({
+        name: "Solana",
+        symbol: "SOL",
+        decimal: solanaDecimalLength,
+        imageUrl: allTokenList.logoURI,
+      });
+    }
   }, [allTokenList]);
 
   const handleFindTokenData = async (tokenAddress) => {
