@@ -48,6 +48,8 @@ export default function Header() {
     localStorage.removeItem("pubKey");
     localStorage.removeItem("data");
     localStorage.removeItem("secure");
+    localStorage.removeItem("locked");
+    localStorage.removeItem("srt");
     navigate("/");
   };
 

@@ -43,6 +43,12 @@ export const ImportWallet = (props) => {
     setUserLogined(localStorage.getItem("data") ? true : false);
   };
 
+  const setLockTime = () => {
+    const date = new Date();
+    const currentTime = date.getTime();
+    localStorage.setItem("srt", currentTime);
+  };
+
   const onClickMnemonicLogin = async () => {
     if (bip39.validateMnemonic(userMnemonic)) {
       setLoginMnemonic(true);
@@ -62,6 +68,7 @@ export const ImportWallet = (props) => {
 
     window.localStorage.setItem("secure", hashedText);
     window.localStorage.setItem("data", encryptMnemonic);
+    setLockTime();
     navigate("/portfolio");
   };
 

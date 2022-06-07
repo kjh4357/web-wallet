@@ -27,10 +27,46 @@ const App = () => {
     );
     getTokenList();
     handleGetWalletLocking();
+
+    if (localStorage.getItem("srt")) {
+      checkLockedTime();
+    } else {
+      localStorageSetTime();
+    }
   }, []);
 
+  const localStorageSetTime = () => {
+    const date = new Date();
+    const currentTime = date.getTime();
+    localStorage.setItem("srt", currentTime);
+    setTimeout(() => {
+      setIsLocked(true);
+    }, 900000);
+  };
+
+  const checkLockedTime = () => {
+    const date = new Date();
+    const dueTIme = 900000;
+    const currentTime = date.getTime();
+    const prevTime = Number(localStorage.getItem("srt"));
+    if (prevTime + dueTIme < currentTime) {
+      setIsLocked(true);
+    } else {
+      handleWalletLockTimer();
+    }
+  };
+
+  const handleWalletLockTimer = () => {
+    const date = new Date();
+    const dueTIme = 900000;
+    const currentTime = date.getTime();
+    const prevTime = Number(localStorage.getItem("srt"));
+    setTimeout(() => {
+      setIsLocked(true);
+    }, dueTIme + prevTime - currentTime);
+  };
+
   useEffect(() => {
-    console.log(isLocked, isLogined);
     if (isLocked && isLogined) {
       navigate("/locked");
     } else if (!isLocked && isLogined) {

@@ -35,10 +35,17 @@ export const LockedWallet = () => {
         return;
       }
       localStorage.removeItem("locked");
+      setLockTime();
       handlePasswordLogin();
     } else {
       toast.error("비밀번호를 입력하세요");
     }
+  };
+
+  const setLockTime = () => {
+    const date = new Date();
+    const currentTime = date.getTime();
+    localStorage.setItem("srt", currentTime);
   };
 
   const getHashedValue = async (text) => {
@@ -56,6 +63,7 @@ export const LockedWallet = () => {
       localStorage.removeItem("data");
       localStorage.removeItem("secure");
       localStorage.removeItem("locked");
+      localStorage.removeItem("srt");
       navigate("/");
     } else {
       toast.error("입력필드를 확인해주세요");
