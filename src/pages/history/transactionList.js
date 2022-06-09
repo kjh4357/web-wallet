@@ -89,7 +89,7 @@ export const TransactionList = () => {
             </ul>
           ) : (
             <div className="flex flex-col items-center justify-center min-h-full">
-              <p className="p-10 text-3xl text-center ">데이터가 없습니다</p>
+              <p className="p-10 text-3xl text-center ">거래 기록이 없습니다</p>
             </div>
           )}
         </div>

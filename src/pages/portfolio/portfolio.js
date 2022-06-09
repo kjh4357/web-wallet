@@ -217,10 +217,12 @@ export const Portfolio = () => {
           let coinData = await handleFindTokenData(
             item.account.data.parsed.info.mint
           );
+          console.log(coinData);
           setTokenList((prev) => [
             ...prev,
             {
-              tokenName: coinData ? coinData.symbol : "UNKNOWN",
+              tokenName: coinData ? coinData.name : "UNKNOWN",
+              symbol: coinData ? coinData.symbol : null,
               balance: addDecimal(
                 item.account.data.parsed.info.tokenAmount.uiAmount,
                 item.account.data.parsed.info.tokenAmount.decimals
@@ -727,9 +729,17 @@ export const Portfolio = () => {
                           {index === 0
                             ? solanaTokenData.name
                             : item.data
-                            ? item.data.symbol
+                            ? item.data.name
                             : "UNKNOWN"}
+                          <em className="ml-5 not-italic font-normal">
+                            {index === 0
+                              ? `(${solanaTokenData.symbol})`
+                              : item.data
+                              ? `(${item.data.symbol})`
+                              : null}
+                          </em>
                         </span>
+
                         {/* <p className="text-lg break-all">{item.pubKey}</p> */}
                       </div>
                     </div>
@@ -759,7 +769,7 @@ export const Portfolio = () => {
                       {item.pubKey}
                     </p>
                   )}
-                  <div className="mt-5 text-center md:text-right md:flex md:justify-between">
+                  <div className="mt-5 text-center md:text-right md:flex md:justify-between lg:mt-0">
                     <button
                       type="button"
                       className="items-center justify-center hidden text-xl text-gray-400 cursor-pointer md:flex text-gray"
