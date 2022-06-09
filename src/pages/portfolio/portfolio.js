@@ -16,6 +16,10 @@ import {
   Transaction,
   SystemProgram,
   LAMPORTS_PER_SOL,
+  VoteAccount,
+  NONCE_ACCOUNT_LENGTH,
+  NonceAccount,
+  VOTE_PROGRAM_ID,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import * as bip39 from "bip39";
@@ -47,6 +51,7 @@ export const Portfolio = () => {
   const [isSolanaToken, setIsSolanaToken] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [isNotHaveToken, setIsNotHaveToken] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
@@ -80,6 +85,30 @@ export const Portfolio = () => {
     getSolanaBalance();
   }, [pubKey, userMnemonic]);
 
+  useEffect(() => {
+    if (allTokenList) {
+      setSolanaTokenData({
+        name: "Solana",
+        symbol: "SOL",
+        decimal: solanaDecimalLength,
+        imageUrl: allTokenList.logoURI,
+      });
+    }
+  }, [allTokenList]);
+
+  useEffect(() => {
+    if (toAddress) {
+      // handleCheckToAccountToken();
+      validateSolAddress(toAddress);
+    }
+  }, [toAddress]);
+
+  useEffect(() => {
+    if (!receiptModal) {
+      setIsNotHaveToken(false);
+    }
+  }, [receiptModal]);
+
   const handleObservedWalletLocked = () => {
     setIsLocked(localStorage.getItem("locked"));
   };
@@ -102,17 +131,6 @@ export const Portfolio = () => {
   const getSessionStorageCoinList = () => {
     setAllTokenList(JSON.parse(sessionStorage.getItem("tokenList")));
   };
-
-  useEffect(() => {
-    if (allTokenList) {
-      setSolanaTokenData({
-        name: "Solana",
-        symbol: "SOL",
-        decimal: solanaDecimalLength,
-        imageUrl: allTokenList.logoURI,
-      });
-    }
-  }, [allTokenList]);
 
   const handleFindTokenData = async (tokenAddress) => {
     if (allTokenList) {
@@ -139,19 +157,30 @@ export const Portfolio = () => {
     }
   };
 
-  useEffect(() => {
-    if (toAddress) {
-      validateSolAddress(toAddress);
+  const handleCheckToAccountToken = async (pubkey) => {
+    if (selectedToken.tokenName !== "SOL") {
+      const mint = new PublicKey(selectedToken.pubKey);
+      const toAccount = await splToken.getAssociatedTokenAddress(mint, pubkey);
+      try {
+        const account = await splToken.getAccount(connection, toAccount);
+        if (account.mint.equals(mint)) {
+          setIsNotHaveToken(false);
+        }
+      } catch (err) {
+        setIsNotHaveToken(true);
+      }
     }
-  }, [toAddress]);
+  };
 
   const validateSolAddress = async (toAddress) => {
     try {
       let pubkey = new PublicKey(toAddress);
       let isSolana = await PublicKey.isOnCurve(pubkey);
+      handleCheckToAccountToken(pubkey);
       setIsSolanaToken(isSolana);
     } catch (err) {
       setIsSolanaToken(false);
+      setIsNotHaveToken(false);
     }
   };
 
@@ -196,6 +225,7 @@ export const Portfolio = () => {
                 item.account.data.parsed.info.tokenAmount.uiAmount,
                 item.account.data.parsed.info.tokenAmount.decimals
               ),
+              pubKey: item.account.data.parsed.info.mint,
               balanceString:
                 item.account.data.parsed.info.tokenAmount.uiAmountString,
               decimal: item.account.data.parsed.info.tokenAmount.decimals,
@@ -341,13 +371,13 @@ export const Portfolio = () => {
         lamports: LAMPORTS_PER_SOL, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
       })
     );
-
     let responseBlockhash = await connection.getLatestBlockhash("finalized");
     transaction.recentBlockhash = responseBlockhash.blockhash;
     transaction.feePayer = wallet.publicKey;
+
     const response = await connection.getFeeForMessage(
       transaction.compileMessage(),
-      "confirmed"
+      "processed"
     );
     setLoading((prev) => !prev);
     return response.value;
@@ -379,6 +409,7 @@ export const Portfolio = () => {
   const sendToken = async () => {
     if (selectedToken.tokenName === "SOL") {
       const res = await postTransferTokenForSolana();
+
       if (res) {
         setReceiptModal(false);
         navigate("/history");
@@ -395,48 +426,58 @@ export const Portfolio = () => {
   const postTransferTokenForSolana = async () => {
     setLoading((prev) => !prev);
     const amount = sendAmount * Math.pow(10, selectedToken.decimal - 1);
-    let transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: wallet.publicKey,
-        toPubkey: new PublicKey(toAddress),
-        lamports: amount, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
-      })
-    );
-    const result = await sendAndConfirmTransaction(connection, transaction, [
-      wallet,
-    ]);
-    setLoading((prev) => !prev);
-    return result;
+    try {
+      let transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: new PublicKey(toAddress),
+          lamports: amount, //Investing 1 SOL. Remember 1 Lamport = 10^-9 SOL.
+        })
+      );
+      const result = await sendAndConfirmTransaction(connection, transaction, [
+        wallet,
+      ]);
+      setLoading((prev) => !prev);
+      return result;
+    } catch (err) {
+      setLoading((prev) => !prev);
+      toast.error("수수료 잔액이 부족합니다");
+    }
   };
 
   const postTransferToken = async () => {
     setLoading((prev) => !prev);
-    const mint = new PublicKey(selectedToken.tokenName);
+    const mint = new PublicKey(selectedToken.pubKey);
     const amount = sendAmount * Math.pow(10, selectedToken.decimal);
-    const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
-      connection,
-      wallet,
-      mint,
-      wallet.publicKey
-    );
+    try {
+      const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
+        connection,
+        wallet,
+        mint,
+        wallet.publicKey
+      );
 
-    const toAccount = await splToken.getOrCreateAssociatedTokenAccount(
-      connection,
-      wallet,
-      mint,
-      new PublicKey(toAddress)
-    );
+      const toAccount = await splToken.getOrCreateAssociatedTokenAccount(
+        connection,
+        wallet,
+        mint,
+        new PublicKey(toAddress)
+      );
 
-    const transaction = await splToken.transfer(
-      connection,
-      wallet,
-      fromAccount.address,
-      toAccount.address,
-      wallet,
-      amount
-    );
-    setLoading((prev) => !prev);
-    return transaction;
+      const transaction = await splToken.transfer(
+        connection,
+        wallet,
+        fromAccount.address,
+        toAccount.address,
+        wallet,
+        amount
+      );
+      setLoading((prev) => !prev);
+      return transaction;
+    } catch (err) {
+      setLoading((prev) => !prev);
+      toast.error("수수료 잔액이 부족합니다");
+    }
   };
 
   return (
@@ -486,6 +527,14 @@ export const Portfolio = () => {
           <p className="mt-5 text-2xl md:text-lg md:mt-2">
             {addDecimal(fee, solanaDecimalLength)} SOL
           </p>
+          {isNotHaveToken && (
+            <>
+              <p className="mt-10 text-3xl md:text-xl md:mt-8">계정생성비</p>
+              <p className="mt-5 text-2xl md:text-lg md:mt-2">
+                {process.env.REACT_APP_TOKEN_CREATE_ACCOUNT_FEE}
+              </p>
+            </>
+          )}
           <p className="mt-10 text-3xl md:text-xl md:mt-8">남은 수량</p>
           {selectedToken && (
             <p className="mt-5 text-2xl md:text-lg md:mt-2">
@@ -562,6 +611,15 @@ export const Portfolio = () => {
                   올바른 주소가 아닙니다
                 </p>
               )}
+              {isNotHaveToken && (
+                <p className="mt-3 text-xl">
+                  수신자가 귀하가 보내려고 하는 토큰을 소유하고 있지 않습니다.
+                  <br />
+                  수신자를 위해 새로운 계정을 생성하려면{" "}
+                  {process.env.REACT_APP_TOKEN_CREATE_ACCOUNT_FEE} SOL이
+                  소요됩니다.
+                </p>
+              )}
               <div className="mt-20 text-center">
                 <button
                   type="button"
@@ -636,7 +694,7 @@ export const Portfolio = () => {
                   className="py-5 pl-5 border-b border-gray-600"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap items-center flex-shrink-0 mr-10 text-3xl truncate ">
+                    <div className="flex items-center mr-10 text-3xl ">
                       {index === 0 ? (
                         <img
                           src={solanaTokenData.imageUrl}
@@ -658,14 +716,16 @@ export const Portfolio = () => {
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
                       )}
-
-                      <span className="text-3xl font-bold truncate lg:text-2xl">
-                        {index === 0
-                          ? solanaTokenData.name
-                          : item.data
-                          ? item.data.symbol
-                          : "UNKNOWN"}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-3xl font-bold truncate lg:text-2xl">
+                          {index === 0
+                            ? solanaTokenData.name
+                            : item.data
+                            ? item.data.symbol
+                            : "UNKNOWN"}
+                        </span>
+                        {/* <p className="text-lg break-all">{item.pubKey}</p> */}
+                      </div>
                     </div>
                     <div className="flex items-center flex-shrink-0">
                       <span className="text-2xl font-bold">
@@ -675,7 +735,7 @@ export const Portfolio = () => {
                             {item.tokenName.substr(0, 3).toUpperCase()}
                           </span>
                         ) : item.data ? (
-                          <span>{item.data.symbol}</span>
+                          <span className="ml-5">{item.data.symbol}</span>
                         ) : null}
                       </span>
                       <button
@@ -687,6 +747,12 @@ export const Portfolio = () => {
                       </button>
                     </div>
                   </div>
+                  {index !== 0 && (
+                    <p className="mt-5 text-lg break-all">
+                      <span>민트주소 : </span>
+                      {item.pubKey}
+                    </p>
+                  )}
                   <div className="mt-5 text-center md:text-right md:flex md:justify-between">
                     <button
                       type="button"
