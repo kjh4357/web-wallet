@@ -480,6 +480,12 @@ export const Portfolio = () => {
     }
   };
 
+  const onClickCloseSendTokenModal = () => {
+    setToAddress("");
+    setSendTokenModal(false);
+    setIsNotHaveToken(false);
+  };
+
   return (
     <>
       {loading && <Speaner />}
@@ -632,7 +638,7 @@ export const Portfolio = () => {
               <button
                 type="button"
                 className="absolute text-2xl font-medium text-white outline-none top-5 right-5"
-                onClick={() => setSendTokenModal(false)}
+                onClick={onClickCloseSendTokenModal}
               >
                 <Icon path={mdiClose} size={1.5} color="white" />
               </button>
