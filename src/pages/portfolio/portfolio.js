@@ -579,7 +579,9 @@ export const Portfolio = () => {
               <p className="px-10 mt-10 text-3xl">
                 잔액 :{" "}
                 {addDecimal(selectedToken.balance, selectedToken.decimal)}{" "}
-                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
+                {selectedToken.tokenName === "SOL"
+                  ? "SOL"
+                  : selectedToken.symbol}
               </p>
             </div>
             <div className="mt-10">
