@@ -44,7 +44,7 @@ export const TransactionList = () => {
 
   return (
     <>
-      <div className="absolute w-full px-10 py-8 bg-card-gray">
+      <div className="absolute w-full px-10 py-8 bg-card-gray xl:py-5">
         <Link to="/portfolio">
           <Icon path={mdiChevronLeft} size={2} color="white" />
         </Link>
@@ -52,10 +52,12 @@ export const TransactionList = () => {
       {loading ? (
         <Speaner />
       ) : (
-        <div className="px-10 pt-48 pb-20 ">
-          <h1 className="text-5xl font-bold">Transaction List</h1>
+        <div className="px-10 pt-48 pb-20 mx-auto max-w-1240 xl:pt-32">
+          <h1 className="text-5xl font-bold xl:text-2xl">
+            Transaction History
+          </h1>
           {transactions.length > 0 ? (
-            <ul className="mt-10">
+            <ul className="mt-10 xl:mt-5">
               {transactions.map((item, index) => (
                 <li
                   key={index.toString()}
@@ -70,14 +72,14 @@ export const TransactionList = () => {
                       "?cluster=devnet"
                     }`}
                     target="_blank"
-                    className="flex items-center justify-between w-full px-5 cursor-pointer py-7"
+                    className="flex items-center justify-between w-full px-5 cursor-pointer py-7 xl:py-5"
                     rel="noreferrer"
                   >
                     <div className="truncate">
-                      <p className="mr-5 text-2xl truncate md:text-xl">
+                      <p className="mr-5 text-2xl truncate md:text-xl xl:text-lg">
                         {item.signature}
                       </p>
-                      <p className="mt-3 text-2xl font-medium text-green-500 md:text-xl">
+                      <p className="mt-3 text-2xl font-medium text-green-500 md:text-xl xl:text-base xl:mt-0">
                         {item.confirmationStatus}
                       </p>
                     </div>

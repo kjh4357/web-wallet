@@ -59,6 +59,12 @@ html, body {
     .max-w-640 {
       max-width: 640px;
     }
+    .max-w-1024 {
+      max-width: 1024px;
+    }
+    .max-w-1240 {
+      max-width: 1240px;
+    }
     .max-w-1440 {
       max-width: 1440px;
     }

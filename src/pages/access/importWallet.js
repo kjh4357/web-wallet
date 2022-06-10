@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import * as bip39 from "bip39";
-import nacl from "tweetnacl";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import crypto from "crypto";

@@ -16,10 +16,6 @@ import {
   Transaction,
   SystemProgram,
   LAMPORTS_PER_SOL,
-  VoteAccount,
-  NONCE_ACCOUNT_LENGTH,
-  NonceAccount,
-  VOTE_PROGRAM_ID,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import * as bip39 from "bip39";
@@ -649,7 +645,7 @@ export const Portfolio = () => {
       </Modal>
       <Header />
       <div className="px-10 pt-40 pb-20 mx-auto md:px-20 md:pt-32 max-w-1440">
-        <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10">
+        <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10 xl:py-8">
           <div className="w-48 h-48 bg-red-800 rounded-full md:w-24 md:h-24 md:flex-shrink-0">
             {pubKey && (
               <img
@@ -718,7 +714,7 @@ export const Portfolio = () => {
                       ) : (
                         <img
                           src={`data:image/svg+xml;utf8,${generateFromString(
-                            item.tokenName
+                            item.pubKey
                           )}`}
                           alt=""
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
@@ -772,7 +768,7 @@ export const Portfolio = () => {
                   <div className="mt-5 text-center md:text-right md:flex md:justify-between lg:mt-0">
                     <button
                       type="button"
-                      className="items-center justify-center hidden text-xl text-gray-400 cursor-pointer md:flex text-gray"
+                      className="items-center justify-center hidden text-xl text-gray-400 cursor-pointer md:flex text-gray xl:text-base"
                       onClick={onClickMoveTransactionList}
                     >
                       더 많은 작업
