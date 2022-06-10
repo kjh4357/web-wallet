@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { clusterApiUrl, Connection } from "@solana/web3.js";
 import * as bip39 from "bip39";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -13,7 +12,6 @@ const loop = 104901;
 export const ImportWallet = (props) => {
   const tabMenu = ["복구문구로", "비밀번호로"];
   const navigate = useNavigate();
-  const [connection, setConnection] = useState();
   const [userMnemonic, setUserMnemonic] = useState("");
   const [userLogined, setUserLogined] = useState(false);
   const [loginMnemonic, setLoginMnemonic] = useState(false);
@@ -28,13 +26,6 @@ export const ImportWallet = (props) => {
   }, [password, confirm]);
 
   useEffect(() => {
-    // Solana 네트워크 연결
-    setConnection(
-      new Connection(
-        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
-        "confirmed"
-      )
-    );
     handleCheckUserLogin();
   }, []);
 
@@ -92,6 +83,7 @@ export const ImportWallet = (props) => {
     if (walletPassword && tabIndex === 1) {
       handlePasswordLogin();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userMnemonic]);
 
   const handlePasswordLogin = async () => {

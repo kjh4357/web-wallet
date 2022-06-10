@@ -43,15 +43,14 @@ export const Portfolio = () => {
   const [sendTokenModal, setSendTokenModal] = useState(false);
   const [receiptModal, setReceiptModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
-  const [typedMessage, setTypedMessage] = useState(false);
   const [isSolanaToken, setIsSolanaToken] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
   const [isNotHaveToken, setIsNotHaveToken] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
   const [solanaTokenData, setSolanaTokenData] = useState(null);
+  const [rentBalance, setRentBalance] = useState(null);
   const [toAddress, setToAddress] = useState("");
   const [password, setPassword] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -61,7 +60,7 @@ export const Portfolio = () => {
   const [userMnemonic, setUserMnemonic] = useState("");
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
-  const { keypair, updateKeypair } = useContext(KeypairContext);
+  const { updateKeypair } = useContext(KeypairContext);
 
   useEffect(() => {
     // Solana 네트워크 연결
@@ -71,14 +70,16 @@ export const Portfolio = () => {
         "confirmed"
       )
     );
+
     getLocalStorageUserData();
     getSessionStorageCoinList();
-    handleObservedWalletLocked();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     importWallet();
     getSolanaBalance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pubKey, userMnemonic]);
 
   useEffect(() => {
@@ -94,9 +95,9 @@ export const Portfolio = () => {
 
   useEffect(() => {
     if (toAddress) {
-      // handleCheckToAccountToken();
       validateSolAddress(toAddress);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toAddress]);
 
   useEffect(() => {
@@ -105,8 +106,9 @@ export const Portfolio = () => {
     }
   }, [receiptModal]);
 
-  const handleObservedWalletLocked = () => {
-    setIsLocked(localStorage.getItem("locked"));
+  const getMinimumRentExamption = async () => {
+    const balance = await connection.getMinimumBalanceForRentExemption(165);
+    setRentBalance(addDecimal(balance, solanaDecimalLength));
   };
 
   const getLocalStorageUserData = () => {
@@ -157,6 +159,7 @@ export const Portfolio = () => {
     if (selectedToken.tokenName !== "SOL") {
       const mint = new PublicKey(selectedToken.pubKey);
       const toAccount = await splToken.getAssociatedTokenAddress(mint, pubkey);
+
       try {
         const account = await splToken.getAccount(connection, toAccount);
         if (account.mint.equals(mint)) {
@@ -164,6 +167,7 @@ export const Portfolio = () => {
         }
       } catch (err) {
         setIsNotHaveToken(true);
+        getMinimumRentExamption();
       }
     }
   };
@@ -213,7 +217,6 @@ export const Portfolio = () => {
           let coinData = await handleFindTokenData(
             item.account.data.parsed.info.mint
           );
-          console.log(coinData);
           setTokenList((prev) => [
             ...prev,
             {
@@ -438,8 +441,8 @@ export const Portfolio = () => {
       setLoading((prev) => !prev);
       return result;
     } catch (err) {
+      toast.error(err);
       setLoading((prev) => !prev);
-      toast.error("수수료 잔액이 부족합니다");
     }
   };
 
@@ -535,7 +538,7 @@ export const Portfolio = () => {
             <>
               <p className="mt-10 text-3xl md:text-xl md:mt-8">계정생성비</p>
               <p className="mt-5 text-2xl md:text-lg md:mt-2">
-                {process.env.REACT_APP_TOKEN_CREATE_ACCOUNT_FEE}
+                {rentBalance} SOL
               </p>
             </>
           )}
@@ -567,81 +570,77 @@ export const Portfolio = () => {
         </div>
       </Modal>
       <Modal isModalOpen={sendTokenModal} setModalOpen={setSendTokenModal}>
-        {selectedToken &&
-          (typedMessage ? (
-            <div></div>
-          ) : (
-            <div className="py-10 md:min-w-640">
-              <div className="text-center">
-                <h1 className="pb-5 text-3xl font-bold border-b-2">
-                  {selectedToken.tokenName} 보내기
-                </h1>
-                <p className="px-10 mt-10 text-3xl">
-                  잔액 :{" "}
-                  {addDecimal(selectedToken.balance, selectedToken.decimal)}{" "}
-                  {selectedToken.tokenName.substr(0, 3).toUpperCase()}
-                </p>
-              </div>
-              <div className="mt-10">
-                <input
-                  type="text"
-                  className="text-2xl border border-gray-500 bg-card-gray"
-                  onChange={(e) => setSendAmount(e.target.value)}
-                />
-                <p className="text-right">
-                  {selectedToken.tokenName.substr(0, 3).toUpperCase()}
-                </p>
-              </div>
-              <div className="mt-10 text-3xl">
-                <p className="mb-2">From</p>
-                <input
-                  type="text"
-                  value={pubKey}
-                  className="text-2xl border border-gray-500 bg-card-gray"
-                  readOnly
-                />
-              </div>
-              <div className="mt-10 text-3xl">
-                <p className="mb-2">To</p>
-                <input
-                  type="text"
-                  className="text-2xl border border-gray-500 bg-card-gray"
-                  value={toAddress}
-                  onChange={(e) => setToAddress(e.target.value)}
-                />
-              </div>
-              {!isSolanaToken && toAddress.length > 0 && (
-                <p className="mt-3 text-xl text-red-500">
-                  올바른 주소가 아닙니다
-                </p>
-              )}
-              {isNotHaveToken && (
-                <p className="mt-3 text-xl">
-                  수신자가 귀하가 보내려고 하는 토큰을 소유하고 있지 않습니다.
-                  <br />
-                  수신자를 위해 새로운 계정을 생성하려면{" "}
-                  {process.env.REACT_APP_TOKEN_CREATE_ACCOUNT_FEE} SOL이
-                  소요됩니다.
-                </p>
-              )}
-              <div className="mt-20 text-center">
-                <button
-                  type="button"
-                  className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
-                  onClick={onClickTokenSend}
-                >
-                  보내기
-                </button>
-              </div>
+        {selectedToken && (
+          <div className="py-10 md:min-w-640">
+            <div className="text-center">
+              <h1 className="pb-5 text-3xl font-bold border-b-2">
+                {selectedToken.tokenName} 보내기
+              </h1>
+              <p className="px-10 mt-10 text-3xl">
+                잔액 :{" "}
+                {addDecimal(selectedToken.balance, selectedToken.decimal)}{" "}
+                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
+              </p>
+            </div>
+            <div className="mt-10">
+              <input
+                type="text"
+                className="text-2xl border border-gray-500 bg-card-gray"
+                onChange={(e) => setSendAmount(e.target.value)}
+              />
+              <p className="text-right">
+                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
+              </p>
+            </div>
+            {/* <div className="mt-10 text-3xl">
+              <p className="mb-2">From</p>
+              <input
+                type="text"
+                value={pubKey}
+                className="text-2xl border border-gray-500 bg-card-gray"
+                readOnly
+              />
+            </div> */}
+            <div className="mt-10 text-3xl">
+              <p className="mb-2">To</p>
+              <input
+                type="text"
+                className="text-2xl border border-gray-500 bg-card-gray"
+                value={toAddress}
+                onChange={(e) => setToAddress(e.target.value)}
+              />
+            </div>
+            {!isSolanaToken && toAddress.length > 0 && (
+              <p className="mt-3 text-xl text-red-500">
+                올바른 주소가 아닙니다
+              </p>
+            )}
+            {isNotHaveToken && rentBalance && (
+              <p className="mt-3 text-xl">
+                수신자가 귀하가 보내려고 하는 토큰을 소유하고 있지 않습니다.
+                <br />
+                수신자를 위해 새로운 계정을 생성하려면 {rentBalance} SOL이
+                소요됩니다.
+              </p>
+            )}
+            <div className="mt-20 text-center">
               <button
                 type="button"
-                className="absolute text-2xl font-medium text-white outline-none top-5 right-5"
-                onClick={onClickCloseSendTokenModal}
+                className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md loa-gradient"
+                onClick={onClickTokenSend}
               >
-                <Icon path={mdiClose} size={1.5} color="white" />
+                보내기
               </button>
             </div>
-          ))}
+            <button
+              type="button"
+              className="absolute text-2xl font-medium text-white outline-none top-5 right-5"
+              onClick={onClickCloseSendTokenModal}
+            >
+              <Icon path={mdiClose} size={1.5} color="white" />
+            </button>
+          </div>
+        )}
       </Modal>
       <Header />
       <div className="px-10 pt-40 pb-20 mx-auto md:px-20 md:pt-32 max-w-1440">

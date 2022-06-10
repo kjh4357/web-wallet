@@ -31,6 +31,7 @@ export const TransactionList = () => {
     } else {
       navigate("/portfolio");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keypair, connection]);
 
   const getTransactions = async () => {

@@ -26,14 +26,18 @@ const App = () => {
       )
     );
     getTokenList();
+    checkSrt();
     handleGetWalletLocking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  const checkSrt = () => {
     if (localStorage.getItem("srt")) {
       checkLockedTime();
     } else {
       localStorageSetTime();
     }
-  }, []);
+  };
 
   const localStorageSetTime = () => {
     const date = new Date();
@@ -74,6 +78,7 @@ const App = () => {
     } else {
       navigate("/");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLocked, isLogined]);
 
   const getTokenList = async () => {
