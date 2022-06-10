@@ -1,12 +1,13 @@
 import { cls } from "@/utils/utils";
 import { mdiClose, mdiCogOutline } from "@mdi/js";
 import Icon from "@mdi/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Modal from "./modal";
 import util from "util";
 import crypto from "crypto";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -16,7 +17,10 @@ export default function Header() {
   const [logoutModal, setLogoutModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [password, setPassword] = useState("");
+  const ref = useRef();
   const navigate = useNavigate();
+
+  useOnClickOutside(ref, () => setOpenSetting(false));
 
   useEffect(() => {
     setIsLogined(localStorage.getItem("data") ? true : false);
@@ -108,6 +112,7 @@ export default function Header() {
               </button>
             </div>
             <div
+              ref={ref}
               className={cls(
                 " absolute flex-col items-start justify-start w-32 p-5 border border-gray-400 bg-card-gray right-10 top-20",
                 openSetting ? "flex" : "hidden"
