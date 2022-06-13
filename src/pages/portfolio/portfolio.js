@@ -331,9 +331,7 @@ export const Portfolio = () => {
               setRemainSolanaAmount(
                 addDecimal(resultSendAmount, solanaDecimalLength)
               );
-              console.log("1");
               setSendTokenModal(false);
-              console.log("2");
               setReceiptModal(true);
             } else {
               toast.error("SOL 잔액을 확인해주세요");
