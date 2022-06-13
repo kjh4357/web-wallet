@@ -1,7 +1,15 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
 export default function Modal({ isModalOpen, setModalOpen, children }) {
+  useEffect(() => {
+    if (!isModalOpen) {
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.paddingRight = "";
+    }
+
+    console.log();
+  }, [isModalOpen]);
   return (
     <Transition.Root show={isModalOpen} as={Fragment}>
       <Dialog

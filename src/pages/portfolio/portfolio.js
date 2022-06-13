@@ -331,8 +331,10 @@ export const Portfolio = () => {
               setRemainSolanaAmount(
                 addDecimal(resultSendAmount, solanaDecimalLength)
               );
-              setReceiptModal(true);
+              console.log("1");
               setSendTokenModal(false);
+              console.log("2");
+              setReceiptModal(true);
             } else {
               toast.error("SOL 잔액을 확인해주세요");
             }
@@ -345,8 +347,8 @@ export const Portfolio = () => {
               setRemainTokenAmount(
                 addDecimal(calTokenAmount, selectedToken.decimal)
               );
-              setReceiptModal(true);
               setSendTokenModal(false);
+              setReceiptModal(true);
             } else {
               toast.error("SOL 잔액 또는 토큰 잔액을 확인해주세요");
             }
@@ -510,60 +512,7 @@ export const Portfolio = () => {
           <button
             type="button"
             className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
-            onClick={() => setReceiptModal(false)}
-          >
-            <Icon path={mdiClose} size={1.5} color="white" />
-          </button>
-        </div>
-      </Modal>
-      <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
-        <div className="p-10 break-words">
-          <p className="text-3xl md:text-xl">From</p>
-          <p className="mt-5 text-2xl md:text-lg md:mt-2">{pubKey}</p>
-          <p className="mt-10 text-3xl md:text-xl md:mt-8">To</p>
-          <p className="mt-5 text-2xl md:text-lg md:mt-2">{toAddress}</p>
-          <p className="mt-10 text-3xl md:text-xl md:mt-8">보낼 수량</p>
-          {selectedToken && (
-            <p className="mt-5 text-2xl md:text-lg md:mt-2">
-              {addDecimal(sendAmount, selectedToken.decimal)}{" "}
-              {selectedToken.tokenName}
-            </p>
-          )}
-
-          <p className="mt-10 text-3xl md:text-xl md:mt-8">Fee</p>
-          <p className="mt-5 text-2xl md:text-lg md:mt-2">
-            {addDecimal(fee, solanaDecimalLength)} SOL
-          </p>
-          {isNotHaveToken && (
-            <>
-              <p className="mt-10 text-3xl md:text-xl md:mt-8">계정생성비</p>
-              <p className="mt-5 text-2xl md:text-lg md:mt-2">
-                {rentBalance} SOL
-              </p>
-            </>
-          )}
-          <p className="mt-10 text-3xl md:text-xl md:mt-8">남은 수량</p>
-          {selectedToken && (
-            <p className="mt-5 text-2xl md:text-lg md:mt-2">
-              {selectedToken.tokenName === "SOL"
-                ? remainSolanaAmount
-                : remainTokenAmount}{" "}
-              {selectedToken.tokenName}
-            </p>
-          )}
-          <div className="mt-20 text-center">
-            <button
-              type="button"
-              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md lg:text-xl lg:h-16 loa-gradient"
-              onClick={() => setPasswordModal(true)}
-            >
-              보내기
-            </button>
-          </div>
-          <button
-            type="button"
-            className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
-            onClick={() => setReceiptModal(false)}
+            onClick={() => setPasswordModal(false)}
           >
             <Icon path={mdiClose} size={1.5} color="white" />
           </button>
@@ -584,7 +533,9 @@ export const Portfolio = () => {
                   : selectedToken.symbol}
               </p>
             </div>
-            <div className="mt-10">
+
+            <div className="mt-10 text-2xl">
+              <p className="mb-2">금액</p>
               <input
                 type="text"
                 className="text-2xl border border-gray-500 bg-card-gray"
@@ -603,8 +554,8 @@ export const Portfolio = () => {
                 readOnly
               />
             </div> */}
-            <div className="mt-10 text-3xl">
-              <p className="mb-2">To</p>
+            <div className="mt-10 text-2xl">
+              <p className="mb-2">수신자 주소</p>
               <input
                 type="text"
                 className="text-2xl border border-gray-500 bg-card-gray"
@@ -644,6 +595,60 @@ export const Portfolio = () => {
           </div>
         )}
       </Modal>
+      <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
+        <div className="p-10 break-words">
+          {/* <p className="text-3xl text-center md:text-xl">전송합니다</p> */}
+          {/* <p className="mt-5 text-2xl md:text-lg md:mt-2">{pubKey}</p> */}
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">수신자 주소</p>
+          <p className="mt-5 text-2xl md:text-lg md:mt-2">{toAddress}</p>
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">보낼 수량</p>
+          {selectedToken && (
+            <p className="mt-5 text-2xl md:text-lg md:mt-2">
+              {addDecimal(sendAmount, selectedToken.decimal)}{" "}
+              {selectedToken.tokenName}
+            </p>
+          )}
+
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">전송 수수료</p>
+          <p className="mt-5 text-2xl md:text-lg md:mt-2">
+            {addDecimal(fee, solanaDecimalLength)} SOL
+          </p>
+          {isNotHaveToken && (
+            <>
+              <p className="mt-10 text-3xl md:text-xl md:mt-8">계정생성비</p>
+              <p className="mt-5 text-2xl md:text-lg md:mt-2">
+                {rentBalance} SOL
+              </p>
+            </>
+          )}
+          <p className="mt-10 text-3xl md:text-xl md:mt-8">남은 수량</p>
+          {selectedToken && (
+            <p className="mt-5 text-2xl md:text-lg md:mt-2">
+              {selectedToken.tokenName === "SOL"
+                ? remainSolanaAmount
+                : remainTokenAmount}{" "}
+              {selectedToken.tokenName}
+            </p>
+          )}
+          <div className="mt-20 text-center">
+            <button
+              type="button"
+              className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md lg:text-xl lg:h-16 loa-gradient"
+              onClick={() => setPasswordModal(true)}
+            >
+              보내기
+            </button>
+          </div>
+          <button
+            type="button"
+            className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+            onClick={() => setReceiptModal(false)}
+          >
+            <Icon path={mdiClose} size={1.5} color="white" />
+          </button>
+        </div>
+      </Modal>
+
       <Header />
       <div className="px-10 pt-40 pb-20 mx-auto md:px-20 md:pt-32 max-w-1440">
         <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10 xl:py-8">
