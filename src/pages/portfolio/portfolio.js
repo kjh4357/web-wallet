@@ -238,7 +238,6 @@ export const Portfolio = () => {
         setGetTokenLoading(true);
       }
     }
-    // setTokens(response.data.result);
   };
 
   const onClickTextCopy = (e) => {

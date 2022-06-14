@@ -7,8 +7,6 @@ export default function Modal({ isModalOpen, setModalOpen, children }) {
       document.documentElement.style.overflow = "";
       document.documentElement.style.paddingRight = "";
     }
-
-    console.log();
   }, [isModalOpen]);
   return (
     <Transition.Root show={isModalOpen} as={Fragment}>
