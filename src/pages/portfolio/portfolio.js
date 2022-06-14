@@ -45,6 +45,7 @@ export const Portfolio = () => {
   const [passwordModal, setPasswordModal] = useState(false);
   const [isSolanaToken, setIsSolanaToken] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [getTokenloading, setGetTokenLoading] = useState(false);
   const [isNotHaveToken, setIsNotHaveToken] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
@@ -234,6 +235,7 @@ export const Portfolio = () => {
             },
           ]);
         });
+        setGetTokenLoading(true);
       }
     }
     // setTokens(response.data.result);
@@ -696,6 +698,7 @@ export const Portfolio = () => {
           </h2>
           <ul className="border-t border-gray-600">
             {tokenList.length > 0 &&
+              getTokenloading &&
               tokenList.map((item, index) => (
                 <li
                   key={index.toString()}
@@ -703,7 +706,7 @@ export const Portfolio = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center mr-10 text-3xl ">
-                      {index === 0 ? (
+                      {index === 0 && solanaTokenData ? (
                         <img
                           src={solanaTokenData.imageUrl}
                           alt=""
