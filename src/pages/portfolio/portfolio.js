@@ -46,6 +46,7 @@ export const Portfolio = () => {
   const [isSolanaToken, setIsSolanaToken] = useState(false);
   const [loading, setLoading] = useState(false);
   const [getTokenloading, setGetTokenLoading] = useState(false);
+  const [openErrorPopup, setOpenErrorPopup] = useState(false);
   const [isNotHaveToken, setIsNotHaveToken] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [allTokenList, setAllTokenList] = useState([]);
@@ -56,9 +57,11 @@ export const Portfolio = () => {
   const [password, setPassword] = useState("");
   const [sendAmount, setSendAmount] = useState("");
   const [solanaAmount, setSolanaAmount] = useState(null);
+  const [timer, setTimer] = useState(null);
   const [remainSolanaAmount, setRemainSolanaAmount] = useState(null);
   const [remainTokenAmount, setRemainTokenAmount] = useState(null);
   const [userMnemonic, setUserMnemonic] = useState("");
+  const [reloadTime, setReloadTime] = useState(10);
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
   const { updateKeypair } = useContext(KeypairContext);
@@ -106,6 +109,20 @@ export const Portfolio = () => {
       setIsNotHaveToken(false);
     }
   }, [receiptModal]);
+
+  const reloadTimerStart = () => {
+    setTimer(
+      setInterval(() => {
+        setReloadTime((prev) => prev - 1);
+      }, 1000)
+    );
+  };
+
+  useEffect(() => {
+    if (reloadTime === 0) {
+      clearInterval(timer);
+    }
+  }, [reloadTime]);
 
   const getMinimumRentExamption = async () => {
     const balance = await connection.getMinimumBalanceForRentExemption(165);
@@ -209,7 +226,6 @@ export const Portfolio = () => {
           },
         ],
       };
-
       const response = await getUserTokens(data);
       if (response.status === 200) {
         const userTokenList = response.data.result;
@@ -236,6 +252,9 @@ export const Portfolio = () => {
           ]);
         });
         setGetTokenLoading(true);
+      } else {
+        setOpenErrorPopup(true);
+        reloadTimerStart();
       }
     }
   };
@@ -491,6 +510,31 @@ export const Portfolio = () => {
   return (
     <>
       {loading && <Speaner />}
+      <Modal isModalOpen={openErrorPopup} setModalOpen={() => {}}>
+        <div className="mt-5 min-w-320">
+          <div className="mt-8 text-center">
+            <p className="mb-5 text-2xl leading-9">
+              정보를 제대로 불러올 수 없습니다.
+              <br />
+              다시 시도해 주세요.
+            </p>
+            <p className="mb-10 text-lg text-red-200">
+              너무 많은 새로고침을 할 경우
+              <br /> 정보를 제대로 불러올 수 없습니다.
+            </p>
+            <button
+              type="button"
+              className="inline-block w-1/2 h-20 px-5 text-2xl font-medium text-white rounded-md lg:text-lg lg:h-12 loa-gradient"
+              onClick={() => {
+                window.location.reload();
+              }}
+              disabled={reloadTime !== 0}
+            >
+              다시 불러오기 {reloadTime > 0 ? reloadTime : null}
+            </button>
+          </div>
+        </div>
+      </Modal>
       <Modal isModalOpen={passwordModal} setModalOpen={setPasswordModal}>
         <div className="mt-5">
           <h1>비밀번호 확인</h1>{" "}

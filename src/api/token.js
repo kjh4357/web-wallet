@@ -16,6 +16,7 @@ export const getSolanaTokenList = async (data) => {
 export const getUserTokens = async (data) => {
   const response = await axios.post(
     process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT,
+    // "https://api.mainnet-beta.solana.com",
     data,
     {
       headers: {

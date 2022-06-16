@@ -11,7 +11,7 @@ import { TransactionList } from "@/pages/history/transactionList";
 import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
 import { LockedWallet } from "./pages/access/lockedWallet";
-
+import "./utils/api.js";
 const App = () => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState();

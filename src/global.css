@@ -77,9 +77,11 @@ html, body {
     }
   }
 }
+button:disabled,
 .btn:disabled {
   color:#6B7280;
   background: #E5E7EB !important;
+  cursor: not-allowed;
 }
 .min-w-320 {
   min-width: 320px;
