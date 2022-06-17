@@ -720,11 +720,11 @@ export const Portfolio = () => {
       <Header />
       <div className="px-10 pt-40 pb-20 mx-auto md:px-20 md:pt-32 max-w-1440">
         <div className="flex flex-col items-center px-5 py-16 shadow-xl bg-card-gray rounded-xl md:flex-row md:px-10 xl:py-8">
-          <div className="w-48 h-48 bg-red-800 rounded-full md:w-24 md:h-24 md:flex-shrink-0">
+          <div className="w-48 h-48 rounded-full md:w-24 md:h-24 md:flex-shrink-0">
             {pubKey && (
               <img
                 className="rounded-full"
-                src={`data:image/svg+xml;utf8,${generateFromString(pubKey)}`}
+                src="/img/ico_wallet_profile.svg"
                 alt=""
               />
             )}

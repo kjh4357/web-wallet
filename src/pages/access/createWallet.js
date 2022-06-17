@@ -89,12 +89,12 @@ export const CreateWallet = () => {
             <div className="mt-10">
               <input
                 type="password"
-                className="px-10 py-5 text-2xl border border-gray-500 bg-card-gray"
+                className="px-10 py-5 text-2xl border border-gray-500 bg-card-deep-gray"
                 onChange={(e) => setPassword(e.target.value)}
               />
               <input
                 type="password"
-                className="px-10 py-5 mt-5 text-2xl border border-gray-500 bg-card-gray"
+                className="px-10 py-5 mt-5 text-2xl border border-gray-500 bg-card-deep-gray"
                 onChange={(e) => setConfirm(e.target.value)}
               />
             </div>
@@ -107,7 +107,7 @@ export const CreateWallet = () => {
         ) : (
           <div className="mt-20 md:w-full md:mx-auto md:max-w-640">
             <p className="text-4xl font-bold">복구 문구 적어 두기</p>
-            <div className="p-10 mt-10 shadow-xl bg-card-gray md:py-5">
+            <div className="p-10 mt-10 shadow-xl bg-card-deep-gray md:py-5">
               <ul className="grid grid-cols-2 data-number-list">
                 {arrMnemonic &&
                   arrMnemonic.map((item, index) => (

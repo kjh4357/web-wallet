@@ -27,8 +27,11 @@ html, body {
   transform: translate(-50%, -50%);
 }
 .bg-card-gray {
-  background:#28282B
+  background:#202023
 } 
+.bg-card-deep-gray {
+  background:#201A32
+}
 .btn-border-line {
   border: 1px solid #A24159;
 }

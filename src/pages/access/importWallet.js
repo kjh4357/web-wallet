@@ -160,7 +160,7 @@ export const ImportWallet = (props) => {
                   지갑 생성시 저장한 시드문구를 입력하세요
                 </p>
                 <textarea
-                  className="w-full h-56 p-10 mt-10 text-3xl resize-none bg-card-gray"
+                  className="w-full h-56 p-10 mt-10 text-3xl resize-none bg-card-deep-gray"
                   value={userMnemonic}
                   onChange={onChangeMnemonic}
                 ></textarea>
@@ -185,12 +185,12 @@ export const ImportWallet = (props) => {
                 <div className="mt-10">
                   <input
                     type="password"
-                    className="text-box"
+                    className="text-box bg-card-deep-gray"
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <input
                     type="password"
-                    className="mt-10 text-box"
+                    className="mt-10 text-box bg-card-deep-gray"
                     onChange={(e) => setConfirm(e.target.value)}
                   />
                 </div>

@@ -64,17 +64,59 @@ export default function Header() {
     navigate("/locked");
   };
 
+  const onClickChangeNetwork = (e) => {
+    localStorage.setItem("roacoreconfig", e.currentTarget.dataset.net);
+    console.log(e.currentTarget.dataset.net);
+  };
+
   return (
     <>
-      {/* <Modal isModalOpen={!openNetwork} setModalOpen={setOpenNetwork}>
-        <div className="max-w-420">
+      <Modal isModalOpen={openNetwork} setModalOpen={setOpenNetwork}>
+        <div className="min-w-320">
           <h1 className="text-3xl">네트워크 변경</h1>
+          <div className="mt-10 text-center">
+            <ul className="text-left">
+              <li className="border-t border-b border-gray-600 py-7">
+                <button
+                  type="button"
+                  className="block w-full text-3xl text-left cursor-pointer md:text-xl"
+                  data-net="mainnet"
+                  onClick={onClickChangeNetwork}
+                >
+                  MAIN NET
+                  <p className="text-2xl text-gray-400 md:text-lg">
+                    https://api.mainnet-beta.solana.com
+                  </p>
+                </button>
+              </li>
+              <li className="border-b border-gray-600 py-7">
+                <button
+                  type="button"
+                  className="block w-full text-3xl text-left cursor-pointer md:text-xl"
+                  data-net="devnet"
+                  onClick={onClickChangeNetwork}
+                >
+                  DEV NET
+                  <p className="text-2xl text-gray-400 md:text-lg">
+                    https://api.devnet.solana.com
+                  </p>
+                </button>
+              </li>
+            </ul>
+          </div>
+          <button
+            type="button"
+            className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
+            onClick={() => setOpenNetwork(false)}
+          >
+            <Icon path={mdiClose} size={1.5} color="white" />
+          </button>
         </div>
-      </Modal> */}
+      </Modal>
       <Modal isModalOpen={logoutModal} setModalOpen={setLogoutModal}>
         <div className="max-w-420">
           <h1 className="text-3xl">데이터 삭제 후 로그아웃</h1>
-          <p className="mt-10 text-2xl leading-8">
+          <p className="mt-10 text-2xl leading-8 md:text-lg">
             이 작업은 LOA CORE에서 모든 계정을 로그아웃하고
             <br /> 브라우저에서 모든 데이터를 제거합니다.
             <br /> 패스워드를 입력해주세요.
@@ -125,11 +167,20 @@ export default function Header() {
                 openSetting ? "flex" : "hidden"
               )}
             >
-              <button className="py-3 text-2xl" onClick={onClickWalletLocking}>
+              <button
+                className="py-3 text-2xl md:text-xl"
+                onClick={onClickWalletLocking}
+              >
                 잠금
               </button>
+              {/* <button
+                className="py-3 text-2xl md:text-xl"
+                onClick={() => setOpenNetwork(true)}
+              >
+                네트워크
+              </button> */}
               <button
-                className="py-3 text-2xl"
+                className="py-3 text-2xl md:text-xl"
                 onClick={() => setLogoutModal(true)}
               >
                 로그아웃
