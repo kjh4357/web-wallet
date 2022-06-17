@@ -31,6 +31,7 @@ import { derivePath } from "ed25519-hd-key";
 import KeypairContext from "@/context/keypair.context";
 import { Speaner } from "@/components/speaner";
 import util from "util";
+import SolanaTokenContext from "@/context/solanaToken.context";
 
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
@@ -48,10 +49,13 @@ export const Portfolio = () => {
   const [getTokenloading, setGetTokenLoading] = useState(false);
   const [openErrorPopup, setOpenErrorPopup] = useState(false);
   const [isNotHaveToken, setIsNotHaveToken] = useState(false);
-  const [tokenList, setTokenList] = useState([]);
-  const [allTokenList, setAllTokenList] = useState([]);
+  const [tokenList, setTokenList] = useState(null);
+  const [allTokenList, setAllTokenList] = useState(
+    JSON.parse(sessionStorage.getItem("tokenList")) || null
+  );
   const [selectedToken, setSelectedToken] = useState(null);
   const [solanaTokenData, setSolanaTokenData] = useState(null);
+  const [userHoldTokenList, setUserHoldTokenList] = useState(null);
   const [rentBalance, setRentBalance] = useState(null);
   const [toAddress, setToAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -65,6 +69,7 @@ export const Portfolio = () => {
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
   const { updateKeypair } = useContext(KeypairContext);
+  const { solanaTokenList } = useContext(SolanaTokenContext);
 
   useEffect(() => {
     // Solana 네트워크 연결
@@ -74,9 +79,7 @@ export const Portfolio = () => {
         "confirmed"
       )
     );
-
     getLocalStorageUserData();
-    getSessionStorageCoinList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -144,9 +147,18 @@ export const Portfolio = () => {
     setUserMnemonic(userMnemonic);
   };
 
-  const getSessionStorageCoinList = () => {
-    setAllTokenList(JSON.parse(sessionStorage.getItem("tokenList")));
-  };
+  // useEffect(() => {
+  //   const listData = JSON.parse(sessionStorage.getItem("tokenList"));
+  //   if (listData) {
+  //     setAllTokenList(listData);
+  //   }
+  // }, [sessionStorage.getItem("tokenList")]);
+
+  useEffect(() => {
+    if (solanaTokenList) {
+      setAllTokenList(solanaTokenList);
+    }
+  }, [solanaTokenList]);
 
   const handleFindTokenData = async (tokenAddress) => {
     if (allTokenList) {
@@ -229,34 +241,47 @@ export const Portfolio = () => {
       const response = await getUserTokens(data);
       if (response.status === 200) {
         const userTokenList = response.data.result;
+        if (userTokenList) {
+          setUserHoldTokenList(userTokenList);
+        }
 
-        userTokenList.map(async (item) => {
-          let coinData = await handleFindTokenData(
-            item.account.data.parsed.info.mint
-          );
-          setTokenList((prev) => [
-            ...prev,
-            {
-              tokenName: coinData ? coinData.name : "UNKNOWN",
-              symbol: coinData ? coinData.symbol : null,
-              balance: addDecimal(
-                item.account.data.parsed.info.tokenAmount.uiAmount,
-                item.account.data.parsed.info.tokenAmount.decimals
-              ),
-              pubKey: item.account.data.parsed.info.mint,
-              balanceString:
-                item.account.data.parsed.info.tokenAmount.uiAmountString,
-              decimal: item.account.data.parsed.info.tokenAmount.decimals,
-              data: coinData,
-            },
-          ]);
-        });
         setGetTokenLoading(true);
       } else {
         setOpenErrorPopup(true);
         reloadTimerStart();
       }
     }
+  };
+
+  useEffect(() => {
+    if (userHoldTokenList) {
+      handleTokenMaching(userHoldTokenList);
+    }
+  }, [userHoldTokenList]);
+
+  const handleTokenMaching = async (userToken) => {
+    userToken.map(async (item) => {
+      let coinData = await handleFindTokenData(
+        item.account.data.parsed.info.mint
+      );
+
+      setTokenList((prev) => [
+        ...prev,
+        {
+          tokenName: coinData ? coinData.name : "UNKNOWN",
+          symbol: coinData ? coinData.symbol : null,
+          balance: addDecimal(
+            item.account.data.parsed.info.tokenAmount.uiAmount,
+            item.account.data.parsed.info.tokenAmount.decimals
+          ),
+          pubKey: item.account.data.parsed.info.mint,
+          balanceString:
+            item.account.data.parsed.info.tokenAmount.uiAmountString,
+          decimal: item.account.data.parsed.info.tokenAmount.decimals,
+          data: coinData,
+        },
+      ]);
+    });
   };
 
   const onClickTextCopy = (e) => {
@@ -739,9 +764,10 @@ export const Portfolio = () => {
           <h2 className="mb-10 text-4xl font-black md:text-2xl md:mb-5">
             자산
           </h2>
+
           <ul className="border-t border-gray-600">
-            {tokenList.length > 0 &&
-              getTokenloading &&
+            {tokenList &&
+              solanaTokenData &&
               tokenList.map((item, index) => (
                 <li
                   key={index.toString()}
@@ -749,7 +775,7 @@ export const Portfolio = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center mr-10 text-3xl ">
-                      {index === 0 && solanaTokenData ? (
+                      {index === 0 ? (
                         <img
                           src={solanaTokenData.imageUrl}
                           alt=""
@@ -770,6 +796,7 @@ export const Portfolio = () => {
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
                       )}
+
                       <div className="flex flex-col">
                         <span className="text-3xl font-bold truncate lg:text-2xl">
                           {index === 0

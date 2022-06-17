@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useContext, useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
@@ -12,11 +12,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
 import { LockedWallet } from "./pages/access/lockedWallet";
 import "./utils/api.js";
+import SolanaTokenContext from "./context/solanaToken.context";
 const App = () => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState();
   const [isLocked, setIsLocked] = useState(false);
   const [isLogined, setIsLogined] = useState(false);
+  const { updateSolanaToken } = useContext(SolanaTokenContext);
 
   useEffect(() => {
     setConnection(
@@ -84,7 +86,8 @@ const App = () => {
   const getTokenList = async () => {
     const response = await getSolanaTokenList();
     if (response.status === 200) {
-      sessionStorage.setItem("tokenList", JSON.stringify(response.data));
+      updateSolanaToken(response.data);
+      // sessionStorage.setItem("tokenList", JSON.stringify(response.data));
     }
   };
 

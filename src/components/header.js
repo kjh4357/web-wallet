@@ -16,6 +16,8 @@ export default function Header() {
   const [isLogined, setIsLogined] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+  const [openNetwork, setOpenNetwork] = useState(false);
+  const [network, setNetwork] = useState("");
   const [password, setPassword] = useState("");
   const ref = useRef();
   const navigate = useNavigate();
@@ -64,6 +66,11 @@ export default function Header() {
 
   return (
     <>
+      {/* <Modal isModalOpen={!openNetwork} setModalOpen={setOpenNetwork}>
+        <div className="max-w-420">
+          <h1 className="text-3xl">네트워크 변경</h1>
+        </div>
+      </Modal> */}
       <Modal isModalOpen={logoutModal} setModalOpen={setLogoutModal}>
         <div className="max-w-420">
           <h1 className="text-3xl">데이터 삭제 후 로그아웃</h1>
@@ -118,10 +125,13 @@ export default function Header() {
                 openSetting ? "flex" : "hidden"
               )}
             >
-              <button className="py-3" onClick={onClickWalletLocking}>
+              <button className="py-3 text-2xl" onClick={onClickWalletLocking}>
                 잠금
               </button>
-              <button className="py-3" onClick={() => setLogoutModal(true)}>
+              <button
+                className="py-3 text-2xl"
+                onClick={() => setLogoutModal(true)}
+              >
                 로그아웃
               </button>
             </div>
