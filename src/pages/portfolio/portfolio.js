@@ -32,7 +32,7 @@ import KeypairContext from "@/context/keypair.context";
 import { Speaner } from "@/components/speaner";
 import util from "util";
 import SolanaTokenContext from "@/context/solanaToken.context";
-
+import { apiTarget, clusterTarget } from "../../utils/utils";
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -73,12 +73,7 @@ export const Portfolio = () => {
 
   useEffect(() => {
     // Solana 네트워크 연결
-    setConnection(
-      new Connection(
-        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
-        "confirmed"
-      )
-    );
+    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
     getLocalStorageUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

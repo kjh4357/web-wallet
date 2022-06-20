@@ -1,5 +1,5 @@
-import { cls } from "@/utils/utils";
-import { mdiClose, mdiCogOutline } from "@mdi/js";
+import { cls, clusterTarget } from "@/utils/utils";
+import { mdiCheckCircle, mdiClose, mdiCogOutline } from "@mdi/js";
 import Icon from "@mdi/react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,12 @@ export default function Header() {
   useEffect(() => {
     setIsLogined(localStorage.getItem("data") ? true : false);
   }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem("roacoreconfig")) {
+      setNetwork(localStorage.getItem("roacoreconfig"));
+    }
+  }, [localStorage.getItem("roacoreconfig")]);
 
   const handleCheckPassword = async () => {
     const secure = window.localStorage.getItem("secure");
@@ -66,7 +72,7 @@ export default function Header() {
 
   const onClickChangeNetwork = (e) => {
     localStorage.setItem("roacoreconfig", e.currentTarget.dataset.net);
-    console.log(e.currentTarget.dataset.net);
+    window.location.reload();
   };
 
   return (
@@ -79,27 +85,43 @@ export default function Header() {
               <li className="border-t border-b border-gray-600 py-7">
                 <button
                   type="button"
-                  className="block w-full text-3xl text-left cursor-pointer md:text-xl"
-                  data-net="mainnet"
+                  className="relative block w-full text-3xl text-left cursor-pointer md:text-xl"
+                  data-net="mainnet-beta"
                   onClick={onClickChangeNetwork}
                 >
-                  MAIN NET
+                  Mainnet
                   <p className="text-2xl text-gray-400 md:text-lg">
-                    https://api.mainnet-beta.solana.com
+                    {process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT_MAIN}
                   </p>
+                  {network === "mainnet-beta" && (
+                    <Icon
+                      path={mdiCheckCircle}
+                      size={1.5}
+                      color="#B34354"
+                      className="absolute right-0 top-1/2 top--50per"
+                    />
+                  )}
                 </button>
               </li>
               <li className="border-b border-gray-600 py-7">
                 <button
                   type="button"
-                  className="block w-full text-3xl text-left cursor-pointer md:text-xl"
+                  className="relative block w-full text-3xl text-left cursor-pointer md:text-xl"
                   data-net="devnet"
                   onClick={onClickChangeNetwork}
                 >
-                  DEV NET
+                  Devnet
                   <p className="text-2xl text-gray-400 md:text-lg">
-                    https://api.devnet.solana.com
+                    {process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT_DEV}
                   </p>
+                  {network === "devnet" && (
+                    <Icon
+                      path={mdiCheckCircle}
+                      size={1.5}
+                      color="#B34354"
+                      className="absolute right-0 top-1/2 top--50per"
+                    />
+                  )}
                 </button>
               </li>
             </ul>
@@ -163,24 +185,24 @@ export default function Header() {
             <div
               ref={ref}
               className={cls(
-                " absolute flex-col items-start justify-start w-32 p-5 border border-gray-400 bg-card-gray right-10 top-20",
+                " absolute flex-col items-start justify-start w-52 p-5 border border-gray-400 bg-card-gray right-10 top-20 text-left min-w-max",
                 openSetting ? "flex" : "hidden"
               )}
             >
               <button
-                className="py-3 text-2xl md:text-xl"
+                className="py-3 text-2xl text-left md:text-xl"
                 onClick={onClickWalletLocking}
               >
                 잠금
               </button>
-              {/* <button
-                className="py-3 text-2xl md:text-xl"
+              <button
+                className="py-3 text-2xl text-left md:text-xl"
                 onClick={() => setOpenNetwork(true)}
               >
-                네트워크
-              </button> */}
+                네트워크 : {network === "mainnet-beta" ? "MAINNET" : "DEVNET"}
+              </button>
               <button
-                className="py-3 text-2xl md:text-xl"
+                className="py-3 text-2xl text-left md:text-xl"
                 onClick={() => setLogoutModal(true)}
               >
                 로그아웃

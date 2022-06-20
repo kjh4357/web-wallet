@@ -6,7 +6,7 @@ import Icon from "@mdi/react";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { clusterTarget } from "../../utils/utils";
 export const TransactionList = () => {
   const { keypair } = useContext(KeypairContext);
   const [connection, setConnection] = useState();
@@ -15,12 +15,7 @@ export const TransactionList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setConnection(
-      new Connection(
-        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
-        "confirmed"
-      )
-    );
+    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
   }, []);
 
   useEffect(() => {
@@ -69,8 +64,7 @@ export const TransactionList = () => {
                 >
                   <a
                     href={`https://explorer.solana.com/tx/${item.signature}${
-                      process.env.NODE_ENV === "development" &&
-                      "?cluster=devnet"
+                      clusterTarget === "devnet" && "?cluster=devnet"
                     }`}
                     target="_blank"
                     className="flex items-center justify-between w-full px-5 cursor-pointer py-7 xl:py-5"

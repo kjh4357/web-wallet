@@ -35,6 +35,9 @@ html, body {
 .btn-border-line {
   border: 1px solid #A24159;
 }
+.top--50per{
+  transform: translateY(-50%);
+}
 @layer components {
   input {
    @apply border-2 w-full px-5 py-3

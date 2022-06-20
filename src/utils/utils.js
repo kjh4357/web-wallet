@@ -2,6 +2,18 @@ export function cls(...classnames) {
   return classnames.join(" ");
 }
 
+export const apiTarget = localStorage.getItem("roacoreconfig")
+  ? localStorage.getItem("roacoreconfig") === "mainnet-beta"
+    ? process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT_MAIN
+    : process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT_DEV
+  : process.env.REACT_APP_SOLANA_CLUSTER_RPC_ENDPOINT;
+
+export const clusterTarget = localStorage.getItem("roacoreconfig")
+  ? localStorage.getItem("roacoreconfig") === "mainnet-beta"
+    ? process.env.REACT_APP_SOLANA_CLUSTER_TARGET_MAIN
+    : process.env.REACT_APP_SOLANA_CLUSTER_TARGET_DEV
+  : process.env.REACT_APP_SOLANA_CLUSTER_TARGET;
+
 export function addDecimal(amount, lamport = 9) {
   if (Number.isInteger(amount)) {
     return Number(amount / Math.pow(10, lamport - 1));

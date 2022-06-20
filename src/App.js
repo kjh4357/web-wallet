@@ -30,8 +30,18 @@ const App = () => {
     getTokenList();
     checkSrt();
     handleGetWalletLocking();
+    setApiTarget();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const setApiTarget = () => {
+    if (!localStorage.getItem("roacoreconfig")) {
+      localStorage.setItem(
+        "roacoreconfig",
+        process.env.REACT_APP_SOLANA_CLUSTER_TARGET
+      );
+    }
+  };
 
   const checkSrt = () => {
     if (localStorage.getItem("srt")) {
