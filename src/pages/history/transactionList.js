@@ -64,7 +64,7 @@ export const TransactionList = () => {
                 >
                   <a
                     href={`https://explorer.solana.com/tx/${item.signature}${
-                      clusterTarget === "devnet" && "?cluster=devnet"
+                      clusterTarget === "devnet" ? "?cluster=devnet" : ""
                     }`}
                     target="_blank"
                     className="flex items-center justify-between w-full px-5 cursor-pointer py-7 xl:py-5"

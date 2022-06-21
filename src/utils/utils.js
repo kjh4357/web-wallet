@@ -22,6 +22,15 @@ export function addDecimal(amount, lamport = 9) {
   }
 }
 
+export function addTokenDecimal(amount, lamport = 9) {
+  const numAmount = Number(amount);
+  if (numAmount === 0) {
+    return numAmount;
+  } else {
+    return LBN(Number(amount) / Math.pow(10, lamport), lamport);
+  }
+}
+
 export const splitIntegerAndDecimal = (price) => price.toString().split(".");
 export const commaPlacementSelector = (integer, seperationUnit = 3) => {
   const integerToString = integer.toString();

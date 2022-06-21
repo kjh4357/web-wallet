@@ -13,6 +13,7 @@ import "./global.css";
 import { LockedWallet } from "./pages/access/lockedWallet";
 import "./utils/api.js";
 import SolanaTokenContext from "./context/solanaToken.context";
+import { clusterTarget } from "./utils/utils";
 const App = () => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState();
@@ -21,12 +22,7 @@ const App = () => {
   const { updateSolanaToken } = useContext(SolanaTokenContext);
 
   useEffect(() => {
-    setConnection(
-      new Connection(
-        clusterApiUrl(process.env.REACT_APP_SOLANA_CLUSTER_TARGET),
-        "confirmed"
-      )
-    );
+    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
     getTokenList();
     checkSrt();
     handleGetWalletLocking();
@@ -35,7 +31,7 @@ const App = () => {
   }, []);
 
   const setApiTarget = () => {
-    if (!localStorage.getItem("roacoreconfig")) {
+    if (localStorage.getItem("roacoreconfig") === null) {
       localStorage.setItem(
         "roacoreconfig",
         process.env.REACT_APP_SOLANA_CLUSTER_TARGET

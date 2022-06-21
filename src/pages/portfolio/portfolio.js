@@ -21,7 +21,7 @@ import {
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
-import { addDecimal } from "@/utils/utils";
+import { addDecimal, addTokenDecimal } from "@/utils/utils";
 import Modal from "@/components/modal";
 import Header from "@/components/header";
 import { generateFromString } from "generate-avatar";
@@ -32,7 +32,7 @@ import KeypairContext from "@/context/keypair.context";
 import { Speaner } from "@/components/speaner";
 import util from "util";
 import SolanaTokenContext from "@/context/solanaToken.context";
-import { apiTarget, clusterTarget } from "../../utils/utils";
+import { clusterTarget } from "../../utils/utils";
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -265,10 +265,7 @@ export const Portfolio = () => {
         {
           tokenName: coinData ? coinData.name : "UNKNOWN",
           symbol: coinData ? coinData.symbol : null,
-          balance: addDecimal(
-            item.account.data.parsed.info.tokenAmount.uiAmount,
-            item.account.data.parsed.info.tokenAmount.decimals
-          ),
+          balance: item.account.data.parsed.info.tokenAmount.amount,
           pubKey: item.account.data.parsed.info.mint,
           balanceString:
             item.account.data.parsed.info.tokenAmount.uiAmountString,
@@ -357,7 +354,7 @@ export const Portfolio = () => {
   };
 
   const onClickTokenSend = async () => {
-    if (sendAmount) {
+    if (sendAmount && sendAmount > 0) {
       if (toAddress) {
         if (isSolanaToken) {
           const fees = await getTransactionFee();
@@ -379,12 +376,12 @@ export const Portfolio = () => {
           } else {
             const calSolAmount =
               solanaAmount - addDecimal(fees, solanaDecimalLength);
+            let resultSendAmount =
+              Number(sendAmount) * Math.pow(10, selectedToken.decimal);
             const calTokenAmount =
-              Number(selectedToken.balance) - Number(sendAmount);
+              Number(selectedToken.balance) - resultSendAmount;
             if (calSolAmount >= 0 && calTokenAmount >= 0) {
-              setRemainTokenAmount(
-                addDecimal(calTokenAmount, selectedToken.decimal)
-              );
+              setRemainTokenAmount(calTokenAmount);
               setSendTokenModal(false);
               setReceiptModal(true);
             } else {
@@ -489,7 +486,9 @@ export const Portfolio = () => {
   const postTransferToken = async () => {
     setLoading((prev) => !prev);
     const mint = new PublicKey(selectedToken.pubKey);
-    const amount = sendAmount * Math.pow(10, selectedToken.decimal);
+    const amount = Number(
+      Number(sendAmount) * Math.pow(10, selectedToken.decimal)
+    ).toFixed(0);
     try {
       const fromAccount = await splToken.getOrCreateAssociatedTokenAccount(
         connection,
@@ -590,7 +589,12 @@ export const Portfolio = () => {
               </h1>
               <p className="px-10 mt-10 text-3xl">
                 잔액 :{" "}
-                {addDecimal(selectedToken.balance, selectedToken.decimal)}{" "}
+                {selectedToken.tokenName === "SOL"
+                  ? addDecimal(selectedToken.balance, selectedToken.decimal)
+                  : addTokenDecimal(
+                      selectedToken.balance,
+                      selectedToken.decimal
+                    )}{" "}
                 {selectedToken.tokenName === "SOL"
                   ? "SOL"
                   : selectedToken.symbol}
@@ -600,7 +604,7 @@ export const Portfolio = () => {
             <div className="mt-10 text-2xl">
               <p className="mb-2">금액</p>
               <input
-                type="text"
+                type="number"
                 className="text-2xl border border-gray-500 bg-card-gray"
                 onChange={(e) => setSendAmount(e.target.value)}
               />
@@ -689,7 +693,10 @@ export const Portfolio = () => {
             <p className="mt-5 text-2xl md:text-lg md:mt-2">
               {selectedToken.tokenName === "SOL"
                 ? remainSolanaAmount
-                : remainTokenAmount}{" "}
+                : addTokenDecimal(
+                    remainTokenAmount,
+                    selectedToken.decimal
+                  )}{" "}
               {selectedToken.tokenName}
             </p>
           )}
@@ -813,7 +820,9 @@ export const Portfolio = () => {
                     </div>
                     <div className="flex items-center flex-shrink-0">
                       <span className="text-2xl font-bold">
-                        {item.balance}
+                        {item.tokenName === "SOL"
+                          ? addDecimal(item.balance, item.decimal)
+                          : addTokenDecimal(item.balance, item.decimal)}
                         {index === 0 ? (
                           <span className="ml-5">
                             {item.tokenName.substr(0, 3).toUpperCase()}

@@ -59,6 +59,7 @@ export const ImportWallet = (props) => {
     window.localStorage.setItem("secure", hashedText);
     window.localStorage.setItem("data", encryptMnemonic);
     setLockTime();
+    setApiTarget();
     navigate("/portfolio");
   };
 
@@ -117,6 +118,15 @@ export const ImportWallet = (props) => {
       putWalletPassword();
     } else {
       setIsInValid(true);
+    }
+  };
+
+  const setApiTarget = () => {
+    if (localStorage.getItem("roacoreconfig") === null) {
+      localStorage.setItem(
+        "roacoreconfig",
+        process.env.REACT_APP_SOLANA_CLUSTER_TARGET
+      );
     }
   };
 
