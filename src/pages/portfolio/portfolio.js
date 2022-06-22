@@ -726,7 +726,7 @@ export const Portfolio = () => {
             {pubKey && (
               <img
                 className="rounded-full"
-                src="/img/ico_wallet_profile.svg"
+                src="/img/ico_wallet_profile.png"
                 alt=""
               />
             )}
