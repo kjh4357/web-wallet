@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.21.4",
     "bip39": "^3.0.4",
+    "bs58": "^5.0.0",
     "customize-cra": "^1.0.0",
     "ed25519-hd-key": "^1.2.0",
     "generate-avatar": "^1.4.10",

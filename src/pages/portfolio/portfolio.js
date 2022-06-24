@@ -33,6 +33,7 @@ import { Speaner } from "@/components/speaner";
 import util from "util";
 import SolanaTokenContext from "@/context/solanaToken.context";
 import { clusterTarget } from "../../utils/utils";
+import bs58 from "bs58";
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -68,13 +69,14 @@ export const Portfolio = () => {
   const [reloadTime, setReloadTime] = useState(10);
   const [wallet, setWallet] = useState();
   const [fee, setFee] = useState(null);
-  const { updateKeypair } = useContext(KeypairContext);
+  const { keypair, updateKeypair } = useContext(KeypairContext);
   const { solanaTokenList } = useContext(SolanaTokenContext);
 
   useEffect(() => {
     // Solana 네트워크 연결
     setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
     getLocalStorageUserData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -168,10 +170,11 @@ export const Portfolio = () => {
     if (pubKey) {
       const newPubKey = new PublicKey(pubKey);
       const balance = await connection.getBalance(newPubKey);
+
       setTokenList([
         {
           tokenName: "SOL",
-          balance: addDecimal(balance, solanaDecimalLength),
+          balance: balance,
           decimal: solanaDecimalLength,
         },
       ]);
@@ -345,6 +348,7 @@ export const Portfolio = () => {
       setWallet(wallet);
       updateKeypair(wallet);
       setPubkey(wallet.publicKey.toBase58());
+
       localStorage.setItem("pubKey", wallet.publicKey.toBase58());
     }
   };

@@ -15,7 +15,10 @@ export const clusterTarget = localStorage.getItem("roacoreconfig")
   : process.env.REACT_APP_SOLANA_CLUSTER_TARGET;
 
 export function addDecimal(amount, lamport = 9) {
-  if (Number.isInteger(amount)) {
+  const numAmount = Number(amount);
+  if (numAmount === 0) {
+    return numAmount;
+  } else if (Number.isInteger(amount)) {
     return Number(amount / Math.pow(10, lamport - 1));
   } else {
     return LBN(amount, lamport);
@@ -26,6 +29,8 @@ export function addTokenDecimal(amount, lamport = 9) {
   const numAmount = Number(amount);
   if (numAmount === 0) {
     return numAmount;
+  } else if (Number.isInteger(Number(amount) / Math.pow(10, lamport))) {
+    return Number(amount) / Math.pow(10, lamport);
   } else {
     return LBN(Number(amount) / Math.pow(10, lamport), lamport);
   }
