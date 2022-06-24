@@ -283,7 +283,7 @@ export const Portfolio = () => {
     sel.removeAllRanges();
     sel.addRange(range);
     document.execCommand("copy");
-    sel.removeRange(range);
+    sel.removeAllRanges(range);
     toast.success("클립보드에 복사됨");
   };
 
@@ -436,6 +436,7 @@ export const Portfolio = () => {
       }
       sendToken();
       setPasswordModal(false);
+      setToAddress("");
     }
   };
 
@@ -526,6 +527,22 @@ export const Portfolio = () => {
     setIsNotHaveToken(false);
   };
 
+  const onClickConfirmReceiptModal = () => {
+    setReceiptModal(false);
+    setPasswordModal(true);
+  };
+
+  const onClickCloseReceiptModal = () => {
+    setToAddress("");
+    setReceiptModal(false);
+    setIsNotHaveToken(false);
+  };
+
+  const onClickClosePasswordModal = () => {
+    setToAddress("");
+    setPasswordModal(false);
+  };
+
   return (
     <>
       {loading && <Speaner />}
@@ -554,7 +571,7 @@ export const Portfolio = () => {
           </div>
         </div>
       </Modal>
-      <Modal isModalOpen={passwordModal} setModalOpen={setPasswordModal}>
+      <Modal isModalOpen={passwordModal} setModalOpen={() => {}}>
         <div className="mt-5">
           <h1>비밀번호 확인</h1>{" "}
           <input
@@ -574,13 +591,13 @@ export const Portfolio = () => {
           <button
             type="button"
             className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
-            onClick={() => setPasswordModal(false)}
+            onClick={onClickClosePasswordModal}
           >
             <Icon path={mdiClose} size={1.5} color="white" />
           </button>
         </div>
       </Modal>
-      <Modal isModalOpen={sendTokenModal} setModalOpen={setSendTokenModal}>
+      <Modal isModalOpen={sendTokenModal} setModalOpen={() => {}}>
         {selectedToken && (
           <div className="py-10 md:min-w-640">
             <div className="text-center">
@@ -662,7 +679,7 @@ export const Portfolio = () => {
           </div>
         )}
       </Modal>
-      <Modal isModalOpen={receiptModal} setModalOpen={setReceiptModal}>
+      <Modal isModalOpen={receiptModal} setModalOpen={() => {}}>
         <div className="p-10 break-words">
           {/* <p className="text-3xl text-center md:text-xl">전송합니다</p> */}
           {/* <p className="mt-5 text-2xl md:text-lg md:mt-2">{pubKey}</p> */}
@@ -704,7 +721,7 @@ export const Portfolio = () => {
             <button
               type="button"
               className="inline-block w-1/2 h-20 text-2xl font-medium text-white rounded-md lg:text-xl lg:h-16 loa-gradient"
-              onClick={() => setPasswordModal(true)}
+              onClick={onClickConfirmReceiptModal}
             >
               보내기
             </button>
@@ -712,7 +729,7 @@ export const Portfolio = () => {
           <button
             type="button"
             className="absolute text-2xl font-medium text-black outline-none top-5 right-5"
-            onClick={() => setReceiptModal(false)}
+            onClick={onClickCloseReceiptModal}
           >
             <Icon path={mdiClose} size={1.5} color="white" />
           </button>

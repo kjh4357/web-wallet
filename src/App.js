@@ -1,6 +1,6 @@
 import { Suspense, useContext, useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { Home } from "@/pages/home/home";
 import { Portfolio } from "@/pages/portfolio/portfolio";
@@ -10,10 +10,12 @@ import { CreateWallet } from "@/pages/access/createWallet";
 import { TransactionList } from "@/pages/history/transactionList";
 import "react-toastify/dist/ReactToastify.css";
 import "./global.css";
+
 import { LockedWallet } from "./pages/access/lockedWallet";
 import "./utils/api.js";
 import SolanaTokenContext from "./context/solanaToken.context";
 import { clusterTarget } from "./utils/utils";
+
 const App = () => {
   const navigate = useNavigate();
   const [connection, setConnection] = useState();
@@ -27,6 +29,7 @@ const App = () => {
     checkSrt();
     handleGetWalletLocking();
     setApiTarget();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

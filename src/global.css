@@ -2,23 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
-* { 
-font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+* {
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", sans-serif;
 }
 html {
   font-size: -webkit-calc(6px + 0.5vw);
   font-size: calc(6px + 0.5vw);
 }
-html, body {
+html,
+body {
   height: 100%;
   min-height: 100%;
   color: #fff;
   background: #000;
 }
 #root {
-  height: 100%;  min-height: 100%;
+  height: 100%;
+  min-height: 100%;
 }
 .speaner {
   z-index: 9999;
@@ -27,33 +31,36 @@ html, body {
   transform: translate(-50%, -50%);
 }
 .bg-card-gray {
-  background:#202023
-} 
+  background: #202023;
+}
 .bg-card-deep-gray {
-  background:#201A32
+  background: #201a32;
 }
 .btn-border-line {
-  border: 1px solid #A24159;
+  border: 1px solid #a24159;
 }
-.top--50per{
+.top--50per {
   transform: translateY(-50%);
+}
+.Toastify {
+  z-index: 9999;
 }
 @layer components {
   input {
-   @apply border-2 w-full px-5 py-3
+    @apply w-full px-5 py-3 border-2;
   }
   .btn {
-    @apply flex items-center justify-center w-full rounded-full bg-purple-600 text-white h-28 md:h-16 md:text-xl text-3xl font-bold btn-gradient
+    @apply flex items-center justify-center w-full text-3xl font-bold text-white bg-purple-600 rounded-full h-28 md:h-16 md:text-xl btn-gradient;
   }
   .btn-line {
-    @apply flex items-center justify-center w-full rounded-full text-white h-28 md:h-16 md:text-xl text-3xl font-bold btn-border-line
+    @apply flex items-center justify-center w-full text-3xl font-bold text-white rounded-full h-28 md:h-16 md:text-xl btn-border-line;
   }
   .text-box {
-    @apply px-10 py-5 text-2xl bg-card-gray border border-gray-400 md:py-4  lg:py-2 md:px-5
+    @apply px-10 py-5 text-2xl border border-gray-400 bg-card-gray md:py-4 lg:py-2 md:px-5;
   }
- 
+
   .btn-text {
-    @apply flex items-center justify-center w-full rounded-full text-pink-800 h-14 text-3xl font-bold
+    @apply flex items-center justify-center w-full text-3xl font-bold text-pink-800 rounded-full h-14;
   }
   @variants responsive {
     .min-w-640 {
@@ -77,60 +84,59 @@ html, body {
   }
   @variants hover {
     .hover-gradient:hover {
-      color:#fff;
-      background: linear-gradient(to right, #5A356A, #B34354);
+      color: #fff;
+      background: linear-gradient(to right, #5a356a, #b34354);
       border-color: #fff;
     }
   }
 }
 button:disabled,
 .btn:disabled {
-  color:#6B7280;
-  background: #E5E7EB !important;
+  color: #6b7280;
+  background: #e5e7eb !important;
   cursor: not-allowed;
 }
 .min-w-320 {
   min-width: 320px;
 }
 
-.data-number-list li:before{
+.data-number-list li:before {
   color: #fff;
   width: 28px;
   content: attr(data-index);
   display: inline-block;
 }
 .loa-gradient {
-  background: linear-gradient(144.14deg, #603669 -1.09%, #A84257 104.06%);
+  background: linear-gradient(144.14deg, #603669 -1.09%, #a84257 104.06%);
 }
 .btn-gradient {
-  background: linear-gradient(to right, #5A356A, #B34354);
+  background: linear-gradient(to right, #5a356a, #b34354);
 }
 .loader {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader span {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  border-top-color: #5a356a;
+  border-bottom-color: #5a356a;
+  -webkit-animation: single4 2.5s infinite ease-in-out;
+  animation: single4 2.5s infinite ease-in-out;
+}
+@keyframes single4 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
   }
-  
-  .loader span {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 6px solid #fff;
-    border-top-color: #5A356A;
-    border-bottom-color: #5A356A;
-    -webkit-animation: single4 2.5s infinite ease-in-out;
-    animation: single4 2.5s infinite ease-in-out;
+  100% {
+    -webkit-transform: rotate(540deg);
+    transform: rotate(540deg);
   }
-  @keyframes single4 {
-    0% {
-      -webkit-transform: rotate(0deg);
-      transform: rotate(0deg);
-    }
-    100% {
-      -webkit-transform: rotate(540deg);
-      transform: rotate(540deg);
-    }
-  }
-  
+}
