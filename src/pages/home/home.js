@@ -15,7 +15,7 @@ export const Home = () => {
       </div>
       <div className="relative flex flex-col items-center justify-center w-full mt-60 md:mt-20">
         <Link to="/access" className="btn-line md:max-w-640">
-          Import Wallet1
+          Import Wallet
         </Link>
         <Link to="/create" className="mt-10 btn md:max-w-640">
           Create Wallet
