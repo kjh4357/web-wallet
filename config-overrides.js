@@ -5,7 +5,7 @@ const {
 } = require("customize-cra");
 const path = require("path");
 // const resolve = (dir) => path.join(__dirname, dir);
-
+const webpack = require("webpack");
 function myOver(webpackConfig) {
   webpackConfig.module.rules.push({
     test: /\.mjs$/,

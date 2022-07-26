@@ -33,7 +33,8 @@ import { Speaner } from "@/components/speaner";
 import util from "util";
 import SolanaTokenContext from "@/context/solanaToken.context";
 import { clusterTarget } from "../../utils/utils";
-import bs58 from "bs58";
+
+import axios from "axios";
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -236,9 +237,11 @@ export const Portfolio = () => {
           },
         ],
       };
+
       const response = await getUserTokens(data);
       if (response.status === 200) {
         const userTokenList = response.data.result;
+
         if (userTokenList) {
           setUserHoldTokenList(userTokenList);
         }
@@ -262,20 +265,42 @@ export const Portfolio = () => {
       let coinData = await handleFindTokenData(
         item.account.data.parsed.info.mint
       );
+      if (coinData) {
+        setTokenList((prev) => [
+          ...prev,
+          {
+            tokenName: coinData ? coinData.name : "UNKNOWN",
+            symbol: coinData ? coinData.symbol : null,
+            balance: item.account.data.parsed.info.tokenAmount.amount,
+            pubKey: item.account.data.parsed.info.mint,
+            balanceString:
+              item.account.data.parsed.info.tokenAmount.uiAmountString,
+            decimal: item.account.data.parsed.info.tokenAmount.decimals,
+            data: coinData,
+          },
+        ]);
+      } else {
+        const res = await axios.get(
+          // "https://api.solscan.io/token/meta?token=8BMzMi2XxZn9afRaMx5Z6fauk9foHXqV5cLTCYWRcVje"
+          `https://api.solscan.io/account?address=${item.account.data.parsed.info.mint}`
+        );
 
-      setTokenList((prev) => [
-        ...prev,
-        {
-          tokenName: coinData ? coinData.name : "UNKNOWN",
-          symbol: coinData ? coinData.symbol : null,
-          balance: item.account.data.parsed.info.tokenAmount.amount,
-          pubKey: item.account.data.parsed.info.mint,
-          balanceString:
-            item.account.data.parsed.info.tokenAmount.uiAmountString,
-          decimal: item.account.data.parsed.info.tokenAmount.decimals,
-          data: coinData,
-        },
-      ]);
+        if (res.data) {
+          setTokenList((prev) => [
+            ...prev,
+            {
+              tokenName: res.data.data.metadata.data.name,
+              symbol: res.data.data.metadata.data.symbol,
+              balance: item.account.data.parsed.info.tokenAmount.amount,
+              pubKey: item.account.data.parsed.info.mint,
+              balanceString:
+                item.account.data.parsed.info.tokenAmount.uiAmountString,
+              decimal: item.account.data.parsed.info.tokenAmount.decimals,
+              data: res.data.data,
+            },
+          ]);
+        }
+      }
     });
   };
 
@@ -303,6 +328,11 @@ export const Portfolio = () => {
   };
 
   const importWallet = async () => {
+    // let mintPubkey = new PublicKey(
+    //   "9MwGzSyuQRqmBHqmYwE6wbP3vzRBj4WWiYxWns3rkR7A"
+    // );
+    // let tokenmetaPubkey = await Metadata.getPDA(mintPubkey);
+
     const keypairs = [];
     const accounts = [];
     if (bip39.validateMnemonic(userMnemonic)) {
@@ -804,9 +834,15 @@ export const Portfolio = () => {
                           alt=""
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
-                      ) : item.data ? (
+                      ) : item.data.logoURI ? (
                         <img
                           src={item.data.logoURI}
+                          alt=""
+                          className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
+                        />
+                      ) : item.data.metadata ? (
+                        <img
+                          src={item.data.metadata.data.uri}
                           alt=""
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
@@ -824,15 +860,15 @@ export const Portfolio = () => {
                         <span className="text-3xl font-bold truncate lg:text-2xl">
                           {index === 0
                             ? solanaTokenData.name
-                            : item.data
+                            : item.data.name
                             ? item.data.name
-                            : "UNKNOWN"}
+                            : item.data.metadata.data.name}
                           <em className="ml-5 not-italic font-normal">
                             {index === 0
                               ? `(${solanaTokenData.symbol})`
-                              : item.data
+                              : item.data.symbol
                               ? `(${item.data.symbol})`
-                              : null}
+                              : `(${item.data.metadata.data.symbol})`}
                           </em>
                         </span>
 
@@ -848,9 +884,13 @@ export const Portfolio = () => {
                           <span className="ml-5">
                             {item.tokenName.substr(0, 3).toUpperCase()}
                           </span>
-                        ) : item.data ? (
+                        ) : item.data.symbol ? (
                           <span className="ml-5">{item.data.symbol}</span>
-                        ) : null}
+                        ) : (
+                          <span className="ml-5">
+                            {item.data.metadata.data.symbol}
+                          </span>
+                        )}
                       </span>
                       <button
                         type="button"

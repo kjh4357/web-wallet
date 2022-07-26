@@ -4,6 +4,7 @@ import instance from "../utils/api";
 export const getSolanaTokenList = async (data) => {
   const response = await axios.get(
     "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
+
     {
       headers: {
         "Content-type": "application/json",
