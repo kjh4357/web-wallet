@@ -145,13 +145,6 @@ export const Portfolio = () => {
     setUserMnemonic(userMnemonic);
   };
 
-  // useEffect(() => {
-  //   const listData = JSON.parse(sessionStorage.getItem("tokenList"));
-  //   if (listData) {
-  //     setAllTokenList(listData);
-  //   }
-  // }, [sessionStorage.getItem("tokenList")]);
-
   useEffect(() => {
     if (solanaTokenList) {
       setAllTokenList(solanaTokenList);
@@ -281,11 +274,11 @@ export const Portfolio = () => {
         ]);
       } else {
         const res = await axios.get(
-          // "https://api.solscan.io/token/meta?token=8BMzMi2XxZn9afRaMx5Z6fauk9foHXqV5cLTCYWRcVje"
           `https://api.solscan.io/account?address=${item.account.data.parsed.info.mint}`
         );
 
         if (res.data) {
+          const responseUri = await axios.get(res.data.data.metadata.data.uri);
           setTokenList((prev) => [
             ...prev,
             {
@@ -297,6 +290,7 @@ export const Portfolio = () => {
                 item.account.data.parsed.info.tokenAmount.uiAmountString,
               decimal: item.account.data.parsed.info.tokenAmount.decimals,
               data: res.data.data,
+              imageUri: responseUri.data && responseUri.data.image,
             },
           ]);
         }
@@ -842,7 +836,7 @@ export const Portfolio = () => {
                         />
                       ) : item.data.metadata ? (
                         <img
-                          src={item.data.metadata.data.uri}
+                          src={item.imageUri}
                           alt=""
                           className="w-16 h-16 mr-4 rounded-full md:w-12 md:h-12"
                         />
