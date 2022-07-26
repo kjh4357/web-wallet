@@ -279,6 +279,7 @@ export const Portfolio = () => {
 
         if (res.data) {
           const responseUri = await axios.get(res.data.data.metadata.data.uri);
+
           setTokenList((prev) => [
             ...prev,
             {
@@ -322,11 +323,6 @@ export const Portfolio = () => {
   };
 
   const importWallet = async () => {
-    // let mintPubkey = new PublicKey(
-    //   "9MwGzSyuQRqmBHqmYwE6wbP3vzRBj4WWiYxWns3rkR7A"
-    // );
-    // let tokenmetaPubkey = await Metadata.getPDA(mintPubkey);
-
     const keypairs = [];
     const accounts = [];
     if (bip39.validateMnemonic(userMnemonic)) {
@@ -653,19 +649,9 @@ export const Portfolio = () => {
                 className="text-2xl border border-gray-500 bg-card-gray"
                 onChange={(e) => setSendAmount(e.target.value)}
               />
-              <p className="text-right">
-                {selectedToken.tokenName.substr(0, 3).toUpperCase()}
-              </p>
+              <p className="mt-2 text-right">{selectedToken.symbol}</p>
             </div>
-            {/* <div className="mt-10 text-3xl">
-              <p className="mb-2">From</p>
-              <input
-                type="text"
-                value={pubKey}
-                className="text-2xl border border-gray-500 bg-card-gray"
-                readOnly
-              />
-            </div> */}
+
             <div className="mt-10 text-2xl">
               <p className="mb-2">수신자 주소</p>
               <input
