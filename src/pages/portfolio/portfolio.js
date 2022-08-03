@@ -350,8 +350,12 @@ export const Portfolio = () => {
         keypairs.push(keypair);
         accounts.push(keypair.publicKey);
       }
-
+      const res = await axios.get(
+        "https://api.mainnet-beta.solana.com/haproxy_status"
+      );
+      console.log(res);
       const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
+      console.log(accountsInfo);
       const availAccount = [];
       accountsInfo.forEach((account, i) => {
         if (account != null) {
