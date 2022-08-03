@@ -72,6 +72,7 @@ export const Portfolio = () => {
   const [fee, setFee] = useState(null);
   const { keypair, updateKeypair } = useContext(KeypairContext);
   const { solanaTokenList } = useContext(SolanaTokenContext);
+  const [openAPIErrorPopup, setOpenAPIErrorPopup] = useState(false);
 
   useEffect(() => {
     // Solana 네트워크 연결
@@ -350,27 +351,30 @@ export const Portfolio = () => {
         keypairs.push(keypair);
         accounts.push(keypair.publicKey);
       }
+      try {
+        const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
 
-      const accountsInfo = await connection.getMultipleAccountsInfo(accounts);
-      console.log(accountsInfo);
-      const availAccount = [];
-      accountsInfo.forEach((account, i) => {
-        if (account != null) {
-          availAccount.push(keypairs[i]);
+        const availAccount = [];
+        accountsInfo.forEach((account, i) => {
+          if (account != null) {
+            availAccount.push(keypairs[i]);
+          }
+        });
+
+        let wallet = Keypair.fromSeed(
+          derivePath(`m/44'/501'/0'/0'`, seed.toString("hex")).key
+        );
+        if (availAccount.length > 0) {
+          wallet = availAccount[0];
         }
-      });
+        setWallet(wallet);
+        updateKeypair(wallet);
+        setPubkey(wallet.publicKey.toBase58());
 
-      let wallet = Keypair.fromSeed(
-        derivePath(`m/44'/501'/0'/0'`, seed.toString("hex")).key
-      );
-      if (availAccount.length > 0) {
-        wallet = availAccount[0];
+        localStorage.setItem("pubKey", wallet.publicKey.toBase58());
+      } catch (e) {
+        setOpenAPIErrorPopup(true);
       }
-      setWallet(wallet);
-      updateKeypair(wallet);
-      setPubkey(wallet.publicKey.toBase58());
-
-      localStorage.setItem("pubKey", wallet.publicKey.toBase58());
     }
   };
 
@@ -571,6 +575,27 @@ export const Portfolio = () => {
   return (
     <>
       {loading && <Speaner />}
+      <Modal isModalOpen={openAPIErrorPopup} setModalOpen={() => {}}>
+        <div className="mt-5 min-w-320">
+          <div className="mt-8 text-center">
+            <p className="mb-5 text-2xl leading-10">
+              API서버가 불안정하여 데이터를 불러올 수 없습니다.
+              <br />
+              다시 시도해 주세요.
+            </p>
+
+            <button
+              type="button"
+              className="inline-block w-1/2 h-20 px-5 text-2xl font-medium text-white rounded-md lg:text-lg lg:h-12 loa-gradient"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              새로고침
+            </button>
+          </div>
+        </div>
+      </Modal>
       <Modal isModalOpen={openErrorPopup} setModalOpen={() => {}}>
         <div className="mt-5 min-w-320">
           <div className="mt-8 text-center">
