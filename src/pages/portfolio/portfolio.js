@@ -22,10 +22,12 @@ import * as bip39 from "bip39";
 import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
 import {
-	addComma,
 	addDecimal,
 	addTokenDecimal,
-	updateTextView,
+	comma,
+	inputNumberFormat,
+	removeChar,
+	uncomma,
 } from "@/utils/utils";
 import Modal from "@/components/modal";
 import Header from "@/components/header";
@@ -579,26 +581,13 @@ export const Portfolio = () => {
 	};
 
 	const handleChangeAmount = e => {
-		setSendAmount(e.target.value);
-
-		setSendAmountString(
-			Number.isInteger(Number(e.target.value))
-				? inputPriceFormat(e.target.value)
-				: e.target.value
-		);
+		let str = "" + e.target.value.replace(/,/gi, ""); // 콤마 제거
+		str = str.replace(/(^\s*)|(\s*$)/g, "");
+		setSendAmount(String(Number(uncomma(str))));
 	};
 
-	const inputPriceFormat = str => {
-		console.log("s", str);
-		const comma = str => {
-			str = String(str);
-			return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, "$1,");
-		};
-		const uncomma = str => {
-			str = String(str);
-			return str.replace(/[^\d]+/g, "");
-		};
-		return comma(uncomma(str));
+	const inputNumberFormat = obj => {
+		obj.target.value = comma(obj.target.value);
 	};
 
 	return (
@@ -705,9 +694,15 @@ export const Portfolio = () => {
 							)}
 							<p className="mb-2">금액</p>
 							<input
-								type="number"
+								type="text"
 								className="text-2xl border border-gray-500 bg-card-gray"
 								onChange={handleChangeAmount}
+								onKeyDown={e => inputNumberFormat(e)}
+								onKeyUp={e => {
+									removeChar(e);
+									inputNumberFormat(e);
+								}}
+								// value={sendAmountString}
 							/>
 							<p className="mt-2 text-right">{selectedToken.symbol}</p>
 						</div>
