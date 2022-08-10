@@ -397,14 +397,13 @@ export const Portfolio = () => {
 					const fees = await getTransactionFee();
 					setFee(addDecimal(fees, solanaDecimalLength));
 					if (selectedToken.tokenName === "SOL") {
+						console.log(sendAmount);
 						const resultSendAmount =
 							solanaAmount -
 							addDecimal(fees, solanaDecimalLength) -
 							Number(sendAmount);
 						if (resultSendAmount >= 0) {
-							setRemainSolanaAmount(
-								addDecimal(resultSendAmount, solanaDecimalLength)
-							);
+							setRemainSolanaAmount(resultSendAmount);
 							setSendTokenModal(false);
 							setReceiptModal(true);
 						} else {
@@ -757,15 +756,15 @@ export const Portfolio = () => {
 					<p className="mt-10 text-3xl md:text-xl md:mt-8">보낼 수량</p>
 					{selectedToken && (
 						<p className="mt-5 text-2xl md:text-lg md:mt-2">
-							{addDecimal(sendAmount, selectedToken.decimal)}{" "}
-							{selectedToken.tokenName}
+							{sendAmount} {selectedToken.tokenName}
 						</p>
 					)}
 
 					<p className="mt-10 text-3xl md:text-xl md:mt-8">전송 수수료</p>
-					<p className="mt-5 text-2xl md:text-lg md:mt-2">
+					<p className="mt-5 text-2xl md:text-lg md:mt-2">{fee} SOL</p>
+					{/* <p className="mt-5 text-2xl md:text-lg md:mt-2">
 						{addDecimal(fee, solanaDecimalLength)} SOL
-					</p>
+					</p> */}
 					{isNotHaveToken && (
 						<>
 							<p className="mt-10 text-3xl md:text-xl md:mt-8">계정생성비</p>
