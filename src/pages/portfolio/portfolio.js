@@ -21,7 +21,12 @@ import {
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
-import { addDecimal, addTokenDecimal } from "@/utils/utils";
+import {
+	addComma,
+	addDecimal,
+	addTokenDecimal,
+	updateTextView,
+} from "@/utils/utils";
 import Modal from "@/components/modal";
 import Header from "@/components/header";
 import { generateFromString } from "generate-avatar";
@@ -62,6 +67,7 @@ export const Portfolio = () => {
 	const [toAddress, setToAddress] = useState("");
 	const [password, setPassword] = useState("");
 	const [sendAmount, setSendAmount] = useState("");
+	const [sendAmountString, setSendAmountString] = useState("");
 	const [solanaAmount, setSolanaAmount] = useState(null);
 	const [timer, setTimer] = useState(null);
 	const [remainSolanaAmount, setRemainSolanaAmount] = useState(null);
@@ -572,6 +578,29 @@ export const Portfolio = () => {
 		setPasswordModal(false);
 	};
 
+	const handleChangeAmount = e => {
+		setSendAmount(e.target.value);
+
+		setSendAmountString(
+			Number.isInteger(Number(e.target.value))
+				? inputPriceFormat(e.target.value)
+				: e.target.value
+		);
+	};
+
+	const inputPriceFormat = str => {
+		console.log("s", str);
+		const comma = str => {
+			str = String(str);
+			return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, "$1,");
+		};
+		const uncomma = str => {
+			str = String(str);
+			return str.replace(/[^\d]+/g, "");
+		};
+		return comma(uncomma(str));
+	};
+
 	return (
 		<>
 			{loading && <Speaner />}
@@ -669,11 +698,16 @@ export const Portfolio = () => {
 						</div>
 
 						<div className="mt-10 text-2xl">
+							{sendAmountString !== "" && (
+								<p className="mb-5 text-center">
+									보낼 수량 : {sendAmountString}
+								</p>
+							)}
 							<p className="mb-2">금액</p>
 							<input
 								type="number"
 								className="text-2xl border border-gray-500 bg-card-gray"
-								onChange={e => setSendAmount(e.target.value)}
+								onChange={handleChangeAmount}
 							/>
 							<p className="mt-2 text-right">{selectedToken.symbol}</p>
 						</div>
