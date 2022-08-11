@@ -246,7 +246,6 @@ export const Portfolio = () => {
         const userTokenList = response.data.result;
 
         if (userTokenList) {
-          console.log(userTokenList);
           setUserHoldTokenList(userTokenList);
         }
 
@@ -265,7 +264,6 @@ export const Portfolio = () => {
   }, [userHoldTokenList]);
 
   const handleTokenMaching = async (userToken) => {
-    console.log(userToken);
     userToken.map(async (item) => {
       let coinData = await handleFindTokenData(
         item.account.data.parsed.info.mint
@@ -288,7 +286,7 @@ export const Portfolio = () => {
         const res = await axios.get(
           `https://api.solscan.io/account?address=${item.account.data.parsed.info.mint}`
         );
-        console.log(userToken);
+
         if (res.data) {
           if (res.data.data.metadata) {
             const responseUri = await axios.get(
