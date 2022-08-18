@@ -76,8 +76,8 @@ export const LockedWallet = () => {
         <div className="max-w-640">
           <h1 className="text-3xl">비밀번호를 잊어버리셨나요?</h1>
           <p className="mt-10 text-2xl leading-8">
-            LOA CORE 암호를 잊어버린 경우 할 수 있는 유일한 방법은
-            <br /> LOA CORE 지갑이 지갑에 대해 저장하는 모든 데이터를 지우고
+            ROA CORE 암호를 잊어버린 경우 할 수 있는 유일한 방법은
+            <br /> ROA CORE 지갑이 지갑에 대해 저장하는 모든 데이터를 지우고
             <br />
             니모닉, Ledger 장치, 개인 키 등을 가져와서 다시 시작하는 것입니다.
           </p>

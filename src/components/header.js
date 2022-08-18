@@ -139,7 +139,7 @@ export default function Header() {
         <div className="max-w-420">
           <h1 className="text-3xl">데이터 삭제 후 로그아웃</h1>
           <p className="mt-10 text-2xl leading-8 md:text-lg">
-            이 작업은 LOA CORE에서 모든 계정을 로그아웃하고
+            이 작업은 ROA CORE에서 모든 계정을 로그아웃하고
             <br /> 브라우저에서 모든 데이터를 제거합니다.
             <br /> 패스워드를 입력해주세요.
           </p>
