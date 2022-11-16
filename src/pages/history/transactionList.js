@@ -1,6 +1,6 @@
 import { Speaner } from "@/components/speaner";
 import KeypairContext from "@/context/keypair.context";
-import { cls } from "@/utils/utils";
+import {apiTarget, cls} from "@/utils/utils";
 import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
 import Icon from "@mdi/react";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
@@ -15,7 +15,7 @@ export const TransactionList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
+    setConnection(new Connection(apiTarget, "confirmed"));
   }, []);
 
   useEffect(() => {

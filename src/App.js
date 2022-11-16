@@ -14,7 +14,7 @@ import "./global.css";
 import { LockedWallet } from "./pages/access/lockedWallet";
 import "./utils/api.js";
 import SolanaTokenContext from "./context/solanaToken.context";
-import { clusterTarget } from "./utils/utils";
+import {apiTarget, clusterTarget} from "./utils/utils";
 
 const App = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const App = () => {
   const { updateSolanaToken } = useContext(SolanaTokenContext);
 
   useEffect(() => {
-    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
+    setConnection(new Connection(apiTarget, "confirmed"));
     getTokenList();
     checkSrt();
     handleGetWalletLocking();

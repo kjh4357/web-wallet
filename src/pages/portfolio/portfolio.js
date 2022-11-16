@@ -23,7 +23,7 @@ import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
 import {
   addDecimal,
-  addTokenDecimal,
+  addTokenDecimal, apiTarget,
   comma,
   inputNumberFormat,
   LBN,
@@ -85,7 +85,7 @@ export const Portfolio = () => {
 
   useEffect(() => {
     // Solana 네트워크 연결
-    setConnection(new Connection(clusterApiUrl(clusterTarget), "confirmed"));
+    setConnection(new Connection(apiTarget, "confirmed"));
     getLocalStorageUserData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
