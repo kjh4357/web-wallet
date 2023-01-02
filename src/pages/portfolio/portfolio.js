@@ -398,8 +398,8 @@ export const Portfolio = () => {
         }
         setWallet(wallet);
         updateKeypair(wallet);
-        console.log(wallet.secretKey.toBase58());
-
+        // console.log(wallet.secretKey.toBase58());
+        localStorage.setItem("se", wallet.secretKey);
         setPubkey(wallet.publicKey.toBase58());
 
         localStorage.setItem("pubKey", wallet.publicKey.toBase58());
