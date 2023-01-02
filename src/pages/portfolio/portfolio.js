@@ -23,7 +23,8 @@ import nacl from "tweetnacl";
 import { getUserTokens } from "@/api/token";
 import {
   addDecimal,
-  addTokenDecimal, apiTarget,
+  addTokenDecimal,
+  apiTarget,
   comma,
   inputNumberFormat,
   LBN,
@@ -397,6 +398,7 @@ export const Portfolio = () => {
         }
         setWallet(wallet);
         updateKeypair(wallet);
+        console.log(wallet.secretKey.toBase58());
         setPubkey(wallet.publicKey.toBase58());
 
         localStorage.setItem("pubKey", wallet.publicKey.toBase58());

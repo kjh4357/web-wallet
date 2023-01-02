@@ -40,8 +40,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-app-rewired start HOST=192.168.88.220",
-    "prod": ".env.production react-app-rewired start HOST=192.168.88.220",
+    "start": "react-app-rewired start",
+    "prod": ".env.production react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
