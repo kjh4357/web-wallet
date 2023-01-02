@@ -44,6 +44,7 @@ import SolanaTokenContext from "@/context/solanaToken.context";
 import { clusterTarget } from "../../utils/utils";
 
 import axios from "axios";
+import base58 from "bs58";
 const solanaDecimalLength = String(LAMPORTS_PER_SOL).length;
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const loop = 104901;
@@ -398,8 +399,8 @@ export const Portfolio = () => {
         }
         setWallet(wallet);
         updateKeypair(wallet);
-        // console.log(wallet.secretKey.toBase58());
-        localStorage.setItem("se", wallet.secretKey);
+        console.log(base58.encode(wallet.secretKey));
+
         setPubkey(wallet.publicKey.toBase58());
 
         localStorage.setItem("pubKey", wallet.publicKey.toBase58());
